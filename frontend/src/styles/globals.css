@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+:root {
+  --bg-primary: #0f1219;
+  --bg-secondary: #1a1f2e;
+  --bg-card: #232936;
+  --bg-hover: #2d3548;
+  --border: #333d52;
+  --text-primary: #e8eaf0;
+  --text-secondary: #8b95a8;
+  --accent: #6366f1;
+  --accent-hover: #818cf8;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #3b82f6;
+}
+
+body {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  margin: 0;
+}
+
+code, pre, .monaco-editor {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
