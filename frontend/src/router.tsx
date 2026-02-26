@@ -11,6 +11,7 @@ import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 
 // Eager-loaded pages (small)
 import DashboardPage from '@/pages/DashboardPage';
+import AgentsPage from '@/pages/AgentsPage';
 import AgentPage from '@/pages/AgentPage';
 import GatewayPage from '@/pages/GatewayPage';
 import ConfigPage from '@/pages/ConfigPage';
@@ -35,7 +36,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '/agents',
-    element: <DashboardPage />,
+    element: <AgentsPage />,
   },
   {
     path: '/agents/:agentId',

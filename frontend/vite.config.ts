@@ -15,4 +15,9 @@ export default defineConfig({
       "/ws": { target: "ws://127.0.0.1:8400", ws: true },
     },
   },
+  test: {
+    environment: "jsdom",
+    globals: true,
+    setupFiles: ["./src/test-setup.ts"],
+  },
 });
