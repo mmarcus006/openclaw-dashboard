@@ -12,16 +12,18 @@ interface ToastState {
   clearAll: () => void;
 }
 
+const MAX_TOASTS = 3;
 let toastCounter = 0;
 
 export const useToastStore = create<ToastState>((set) => ({
   toasts: [],
 
-  addToast: (variant: ToastVariant, message: string, duration = 4000) => {
+  addToast: (variant: ToastVariant, message: string, duration = 5000) => {
     const id = `toast-${++toastCounter}`;
-    set((state) => ({
-      toasts: [...state.toasts, { id, variant, message, duration }],
-    }));
+    set((state) => {
+      const next = [...state.toasts, { id, variant, message, duration }];
+      return { toasts: next.slice(-MAX_TOASTS) };
+    });
   },
 
   removeToast: (id: string) => {

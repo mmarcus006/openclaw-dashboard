@@ -37,6 +37,10 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     this.setState({ hasError: false, error: null });
   };
 
+  private handleReload = (): void => {
+    window.location.reload();
+  };
+
   override render(): React.ReactNode {
     if (this.state.hasError) {
       if (this.props.fallback) return this.props.fallback;
@@ -51,9 +55,14 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             <p className="text-text-secondary text-sm mb-4">
               {this.state.error?.message ?? 'An unexpected error occurred'}
             </p>
-            <Button variant="secondary" size="sm" onClick={this.handleReset}>
-              Try again
-            </Button>
+            <div className="flex items-center gap-2 justify-center">
+              <Button variant="secondary" size="sm" onClick={this.handleReset}>
+                Try again
+              </Button>
+              <Button variant="ghost" size="sm" onClick={this.handleReload}>
+                Reload page
+              </Button>
+            </div>
           </div>
         </div>
       );

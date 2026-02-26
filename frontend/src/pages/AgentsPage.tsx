@@ -8,6 +8,7 @@ import { AgentGrid } from '@/components/agents/AgentGrid';
 import { SearchInput } from '@/components/common/SearchInput';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { useAgents } from '@/hooks/useAgents';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useAgentStore, filteredAgents } from '@/stores/agentStore';
 import type { StatusFilter, SortField } from '@/stores/agentStore';
 
@@ -66,6 +67,8 @@ function AgentsContent(): React.ReactElement {
 }
 
 export default function AgentsPage(): React.ReactElement {
+  useDocumentTitle('Agents');
+
   return (
     <Layout title="Agents">
       <ErrorBoundary label="Agents error">

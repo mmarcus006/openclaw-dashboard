@@ -15,6 +15,7 @@ import AgentsPage from '@/pages/AgentsPage';
 import AgentPage from '@/pages/AgentPage';
 import GatewayPage from '@/pages/GatewayPage';
 import ConfigPage from '@/pages/ConfigPage';
+import NotFoundPage from '@/pages/NotFoundPage';
 
 // Lazy-loaded — Monaco is 2.5MB (R4 — MANDATORY)
 const EditorPage = lazy(() => import('@/pages/EditorPage'));
@@ -53,5 +54,9 @@ export const router = createBrowserRouter([
   {
     path: '/gateway',
     element: <GatewayPage />,
+  },
+  {
+    path: '*',
+    element: <NotFoundPage />,
   },
 ]);

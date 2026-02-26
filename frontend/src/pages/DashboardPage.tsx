@@ -9,6 +9,7 @@ import { Layout } from '@/components/layout/Layout';
 import { Card } from '@/components/common/Card';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { useAgents } from '@/hooks/useAgents';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useGatewayStore } from '@/stores/gatewayStore';
 import { formatRelativeTime } from '@/utils/time';
 import type { AgentSummary } from '@/types';
@@ -213,6 +214,8 @@ function DashboardContent(): React.ReactElement {
 }
 
 export default function DashboardPage(): React.ReactElement {
+  useDocumentTitle('Dashboard');
+
   return (
     <Layout title="Fleet Overview">
       <ErrorBoundary label="Dashboard error">

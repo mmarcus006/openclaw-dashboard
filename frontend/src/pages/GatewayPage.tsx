@@ -7,8 +7,11 @@ import { Layout } from '@/components/layout/Layout';
 import { GatewayPanel } from '@/components/gateway/GatewayPanel';
 import { CronJobList } from '@/components/gateway/CronJobList';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 export default function GatewayPage(): React.ReactElement {
+  useDocumentTitle('Gateway');
+
   return (
     <Layout title="Gateway">
       <div className="max-w-4xl space-y-6">

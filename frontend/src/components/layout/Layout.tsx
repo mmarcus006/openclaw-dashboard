@@ -1,10 +1,11 @@
 /**
- * Layout — sidebar + header + main content area.
+ * Layout — sidebar + header + connection banner + main content area.
  */
 
 import React from 'react';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
+import { ConnectionBanner } from '@/components/common/ConnectionBanner';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -18,6 +19,7 @@ export function Layout({ children, title, noPadding }: LayoutProps): React.React
       <Sidebar />
       <div className="flex flex-col flex-1 overflow-hidden">
         <Header title={title} />
+        <ConnectionBanner />
         <main className={`flex-1 overflow-auto ${noPadding ? '' : 'p-6'}`}>
           {children}
         </main>

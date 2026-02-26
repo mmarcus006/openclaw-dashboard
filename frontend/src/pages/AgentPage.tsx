@@ -7,6 +7,7 @@ import { useParams } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
 import { AgentDetail } from '@/components/agents/AgentDetail';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useAgentStore } from '@/stores/agentStore';
 
 function AgentPageContent(): React.ReactElement {
@@ -35,6 +36,7 @@ function AgentPageContent(): React.ReactElement {
 
 export default function AgentPage(): React.ReactElement {
   const { agentId } = useParams<{ agentId: string }>();
+  useDocumentTitle(agentId ? `Agent: ${agentId}` : 'Agent Detail');
 
   return (
     <Layout title={agentId ? `Agent: ${agentId}` : 'Agent Detail'}>

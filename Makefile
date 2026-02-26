@@ -1,4 +1,4 @@
-.PHONY: setup dev backend frontend types test test-backend test-frontend build serve lint
+.PHONY: setup dev backend frontend types test test-backend test-frontend build serve lint e2e
 
 BACKEND_DIR = backend
 FRONTEND_DIR = frontend
@@ -42,3 +42,6 @@ serve:
 lint:
 	cd $(BACKEND_DIR) && $(VENV)/bin/ruff check app/ tests/
 	cd $(FRONTEND_DIR) && npm run lint
+
+e2e:
+	cd $(BACKEND_DIR) && bash smoke.sh

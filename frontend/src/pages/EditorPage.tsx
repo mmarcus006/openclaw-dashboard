@@ -14,6 +14,7 @@ import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { FileEditor } from '@/components/editor/FileEditor';
 import { EditorSidebar } from '@/components/editor/EditorSidebar';
 import { useEditorStore } from '@/stores/editorStore';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 function Breadcrumb(): React.ReactElement | null {
   const currentFile = useEditorStore((s) => s.currentFile);
@@ -119,6 +120,7 @@ function EditorPageContent(): React.ReactElement {
 export default function EditorPage(): React.ReactElement {
   const currentFile = useEditorStore((s) => s.currentFile);
   const title = currentFile ? `Edit: ${currentFile.path}` : 'Editor';
+  useDocumentTitle(title);
 
   return (
     <Layout title={title} noPadding>

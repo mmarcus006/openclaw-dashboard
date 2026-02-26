@@ -8,6 +8,7 @@ import { Layout } from '@/components/layout/Layout';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { FullPageSpinner } from '@/components/common/Spinner';
 import { useConfigStore } from '@/stores/configStore';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 // Lazy-load ConfigEditor (contains Monaco)
 const ConfigEditor = lazy(() =>
@@ -34,8 +35,10 @@ function ConfigPageContent(): React.ReactElement {
 }
 
 export default function ConfigPage(): React.ReactElement {
+  useDocumentTitle('Config');
+
   return (
-    <Layout title="Config — openclaw.json">
+    <Layout title="Config">
       <div className="h-full -m-6">
         <ConfigPageContent />
       </div>

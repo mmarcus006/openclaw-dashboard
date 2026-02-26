@@ -5,6 +5,7 @@
 
 import { create } from 'zustand';
 import { agentsApi } from '@/api/agents';
+import { toastError } from '@/stores/toastStore';
 import type { AgentSummary, AgentDetailResponse } from '@/types';
 
 export type StatusFilter = 'all' | 'active' | 'idle' | 'stopped';
@@ -103,7 +104,9 @@ export const useAgentStore = create<AgentState>((set) => ({
       const { data } = await agentsApi.get(agentId);
       set({ selectedAgent: data, detailLoading: false });
     } catch (e) {
-      set({ error: String(e), detailLoading: false });
+      const msg = String(e);
+      set({ error: msg, detailLoading: false });
+      toastError(`Failed to load agent: ${msg}`);
     }
   },
 

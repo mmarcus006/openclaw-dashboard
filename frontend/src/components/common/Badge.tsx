@@ -4,7 +4,7 @@
 
 import React from 'react';
 
-export type BadgeVariant = 'accent' | 'success' | 'warning' | 'danger' | 'neutral';
+export type BadgeVariant = 'accent' | 'success' | 'warning' | 'danger' | 'info' | 'neutral';
 
 interface BadgeProps {
   children: React.ReactNode;
@@ -17,6 +17,7 @@ const VARIANT_CLASSES: Record<BadgeVariant, string> = {
   success: 'bg-success/20 text-success border border-success/30',
   warning: 'bg-warning/20 text-warning-contrast border border-warning/30',
   danger: 'bg-danger/20 text-danger border border-danger/30',
+  info: 'bg-info/15 text-[#60a5fa] border border-info/30',
   neutral: 'bg-bg-hover text-text-secondary border border-border',
 };
 

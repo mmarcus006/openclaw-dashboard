@@ -4,6 +4,7 @@
 
 import { create } from 'zustand';
 import { configApi } from '@/api/config';
+import { toastError } from '@/stores/toastStore';
 import type { ConfigValidateResponse } from '@/types';
 
 interface ConfigState {
@@ -51,7 +52,9 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
         loading: false,
       });
     } catch (e) {
-      set({ error: String(e), loading: false });
+      const msg = String(e);
+      set({ error: msg, loading: false });
+      toastError(`Failed to load config: ${msg}`);
     }
   },
 

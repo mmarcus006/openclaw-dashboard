@@ -116,16 +116,18 @@ export function FileEditor(): React.ReactElement | null {
           )}
         </div>
 
-        <Button
-          variant="primary"
-          size="sm"
-          loading={saving}
-          disabled={!currentFile.dirty}
-          onClick={() => void handleSave()}
-        >
-          <Save size={13} aria-hidden="true" />
-          Save
-        </Button>
+        <span title={!currentFile.dirty ? 'No unsaved changes' : undefined}>
+          <Button
+            variant="primary"
+            size="sm"
+            loading={saving}
+            disabled={!currentFile.dirty}
+            onClick={() => void handleSave()}
+          >
+            <Save size={13} aria-hidden="true" />
+            Save
+          </Button>
+        </span>
       </div>
 
       {/* Monaco Editor */}

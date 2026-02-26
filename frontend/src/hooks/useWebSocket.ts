@@ -7,9 +7,11 @@
  */
 
 import { useEffect } from 'react';
-import type { WsMessage, WsConnectionState } from '@/types';
+import type { WsMessage, WsConnectionState, WsFileChangedPayload } from '@/types';
 import { useGatewayStore } from '@/stores/gatewayStore';
+import { useEditorStore } from '@/stores/editorStore';
 import { useWsStore } from '@/stores/wsStore';
+import { toastWarning } from '@/stores/toastStore';
 
 const WS_URL = (): string => `ws://${window.location.host}/ws/live`;
 const MIN_RETRY_MS = 1_000;
@@ -72,6 +74,14 @@ function connectWs(): void {
 
       if (msg.type === 'gateway_status') {
         void getFetchStatus()();
+      }
+
+      if (msg.type === 'file_changed') {
+        const { name } = msg.payload as WsFileChangedPayload;
+        const currentFile = useEditorStore.getState().currentFile;
+        if (currentFile && currentFile.path === name) {
+          toastWarning(`${name} was modified externally. Reload to see changes.`);
+        }
       }
     } catch {
       // Malformed message — ignore

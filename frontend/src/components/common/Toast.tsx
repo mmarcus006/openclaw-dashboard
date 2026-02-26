@@ -1,9 +1,10 @@
 /**
  * Toast — notification system.
  * Renders the active toast queue from toastStore.
+ * Auto-dismiss at 5s, max 3 visible, slide-in animation.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CheckCircle, XCircle, Info, AlertTriangle, X } from 'lucide-react';
 import { useToastStore } from '@/stores/toastStore';
 import type { Toast, ToastVariant } from '@/types';
@@ -29,6 +30,13 @@ interface ToastItemProps {
 
 function ToastItem({ toast, onRemove }: ToastItemProps): React.ReactElement {
   const Icon = ICONS[toast.variant];
+  const [visible, setVisible] = useState(false);
+
+  // Trigger slide-in after mount
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setVisible(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
 
   useEffect(() => {
     if (!toast.duration) return;
@@ -40,7 +48,7 @@ function ToastItem({ toast, onRemove }: ToastItemProps): React.ReactElement {
     <div
       role="alert"
       aria-live="assertive"
-      className={`flex items-start gap-3 px-4 py-3 bg-bg-secondary border rounded-lg shadow-xl min-w-64 max-w-sm ${COLORS[toast.variant]}`}
+      className={`flex items-start gap-3 px-4 py-3 bg-bg-secondary border rounded-lg shadow-xl min-w-64 max-w-sm transition-all duration-300 ease-out ${COLORS[toast.variant]} ${visible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}
     >
       <Icon size={16} className="flex-shrink-0 mt-0.5" aria-hidden="true" />
       <p className="text-text-primary text-sm flex-1">{toast.message}</p>
@@ -62,7 +70,8 @@ export function ToastContainer(): React.ReactElement {
   return (
     <div
       aria-label="Notifications"
-      className="fixed bottom-4 right-4 z-50 flex flex-col gap-2"
+      className="fixed bottom-4 right-4 flex flex-col gap-2"
+      style={{ zIndex: 'var(--z-toast)' }}
     >
       {toasts.map((toast) => (
         <ToastItem key={toast.id} toast={toast} onRemove={removeToast} />
