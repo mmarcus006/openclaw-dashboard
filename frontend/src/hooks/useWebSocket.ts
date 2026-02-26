@@ -13,7 +13,10 @@ import { useEditorStore } from '@/stores/editorStore';
 import { useWsStore } from '@/stores/wsStore';
 import { toastWarning } from '@/stores/toastStore';
 
-const WS_URL = (): string => `ws://${window.location.host}/ws/live`;
+const WS_URL = (): string => {
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  return `${protocol}//${window.location.host}/ws/live`;
+};
 const MIN_RETRY_MS = 1_000;
 const MAX_RETRY_MS = 30_000;
 const BACKOFF_FACTOR = 2;
