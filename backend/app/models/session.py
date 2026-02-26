@@ -1,5 +1,5 @@
+
 from pydantic import BaseModel, Field
-from typing import Optional
 
 
 class ContentBlock(BaseModel):
@@ -12,15 +12,15 @@ class ContentBlock(BaseModel):
       - "toolResult": appears as text blocks inside toolResult role messages
     """
     type: str = Field(..., description="Block type: text, thinking, toolCall, toolResult")
-    text: Optional[str] = Field(None, description="Text content (text blocks)")
-    thinking: Optional[str] = Field(None, description="Thinking content (thinking blocks)")
+    text: str | None = Field(None, description="Text content (text blocks)")
+    thinking: str | None = Field(None, description="Thinking content (thinking blocks)")
     # toolCall fields
-    id: Optional[str] = Field(None, description="Tool call ID")
-    name: Optional[str] = Field(None, description="Tool name")
-    arguments: Optional[dict] = Field(None, description="Tool call arguments")
+    id: str | None = Field(None, description="Tool call ID")
+    name: str | None = Field(None, description="Tool name")
+    arguments: dict | None = Field(None, description="Tool call arguments")
     # toolResult fields
-    tool_call_id: Optional[str] = Field(None, description="References a toolCall.id")
-    content: Optional[str | list] = Field(None, description="Tool result content")
+    tool_call_id: str | None = Field(None, description="References a toolCall.id")
+    content: str | list | None = Field(None, description="Tool result content")
 
     def extract_text(self) -> str:
         """Extract displayable text from this block."""
@@ -40,32 +40,32 @@ class SessionMessage(BaseModel):
     id: str = Field(..., description="Message ID from JSONL")
     role: str = Field(..., description="user, assistant, or toolResult")
     content: list[ContentBlock] = Field(default_factory=list, description="Content blocks")
-    content_text: Optional[str] = Field(None, description="Concatenated text for display")
-    timestamp: Optional[str] = Field(None, description="ISO 8601 timestamp")
-    parent_id: Optional[str] = Field(None, description="Parent message ID")
+    content_text: str | None = Field(None, description="Concatenated text for display")
+    timestamp: str | None = Field(None, description="ISO 8601 timestamp")
+    parent_id: str | None = Field(None, description="Parent message ID")
 
 
 class SessionSummary(BaseModel):
     """Summary of a session from sessions.json."""
     session_id: str = Field(..., description="Session key (e.g., agent:main:main)")
     updated_at: int = Field(..., description="Unix timestamp (ms)")
-    model: Optional[str] = Field(None, description="Model used")
-    model_provider: Optional[str] = Field(None, description="Model provider")
-    label: Optional[str] = Field(None, description="Human-readable label")
-    spawned_by: Optional[str] = Field(None, description="Parent session key")
-    total_tokens: Optional[int] = Field(None, description="Total tokens used")
-    input_tokens: Optional[int] = Field(None, description="Input tokens")
-    output_tokens: Optional[int] = Field(None, description="Output tokens")
-    cache_read: Optional[int] = Field(None, description="Cache read tokens")
-    message_count: Optional[int] = Field(None, description="Total JSONL lines")
-    session_file: Optional[str] = Field(None, description="Path to JSONL file")
+    model: str | None = Field(None, description="Model used")
+    model_provider: str | None = Field(None, description="Model provider")
+    label: str | None = Field(None, description="Human-readable label")
+    spawned_by: str | None = Field(None, description="Parent session key")
+    total_tokens: int | None = Field(None, description="Total tokens used")
+    input_tokens: int | None = Field(None, description="Input tokens")
+    output_tokens: int | None = Field(None, description="Output tokens")
+    cache_read: int | None = Field(None, description="Cache read tokens")
+    message_count: int | None = Field(None, description="Total JSONL lines")
+    session_file: str | None = Field(None, description="Path to JSONL file")
 
 
 class SessionListResponse(BaseModel):
     """Response for session list endpoint."""
     sessions: list[SessionSummary] = Field(default_factory=list, description="Session summaries")
     total: int = Field(..., description="Total sessions matching filter")
-    warning: Optional[str] = Field(None, description="Warning message")
+    warning: str | None = Field(None, description="Warning message")
 
 
 class SessionMessageListResponse(BaseModel):
@@ -74,4 +74,4 @@ class SessionMessageListResponse(BaseModel):
     total: int = Field(..., description="Total message count")
     has_more: bool = Field(False, description="Whether more messages exist")
     skipped_lines: int = Field(0, description="Non-message JSONL lines skipped")
-    warning: Optional[str] = Field(None, description="Warning message")
+    warning: str | None = Field(None, description="Warning message")

@@ -15,7 +15,7 @@ Security model:
 
 import hashlib
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import aiofiles
@@ -154,7 +154,7 @@ class FileService:
             path=str(real),
             bytes=len(content.encode()),
             etag=new_etag,
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
         )
         return new_etag
 
@@ -195,7 +195,7 @@ class FileService:
             UTC datetime of last modification.
         """
         ts = path.stat().st_mtime
-        return datetime.fromtimestamp(ts, tz=timezone.utc)
+        return datetime.fromtimestamp(ts, tz=UTC)
 
     @staticmethod
     def detect_language(filename: str) -> str:

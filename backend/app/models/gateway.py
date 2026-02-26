@@ -1,9 +1,9 @@
+from enum import StrEnum
+
 from pydantic import BaseModel, Field
-from enum import Enum
-from typing import Optional
 
 
-class GatewayAction(str, Enum):
+class GatewayAction(StrEnum):
     """Valid gateway actions - enum validated server-side."""
     START = "start"
     STOP = "stop"
@@ -13,10 +13,10 @@ class GatewayAction(str, Enum):
 class GatewayStatusResponse(BaseModel):
     """Response containing gateway status information."""
     running: bool = Field(..., description="Whether the gateway is running")
-    pid: Optional[int] = Field(None, description="Gateway process ID if running")
-    uptime: Optional[str] = Field(None, description="Gateway uptime string")
+    pid: int | None = Field(None, description="Gateway process ID if running")
+    uptime: str | None = Field(None, description="Gateway uptime string")
     channels: dict = Field(default_factory=dict, description="Active channels")
-    error: Optional[str] = Field(None, description="Error message if status unknown")
+    error: str | None = Field(None, description="Error message if status unknown")
 
     model_config = {
         "json_schema_extra": {
@@ -36,7 +36,7 @@ class CommandResponse(BaseModel):
     success: bool = Field(..., description="Whether the command succeeded")
     action: GatewayAction = Field(..., description="Action that was performed")
     message: str = Field(..., description="Human-readable response message")
-    output: Optional[str] = Field(None, description="Command output if available")
+    output: str | None = Field(None, description="Command output if available")
 
     model_config = {
         "json_schema_extra": {
@@ -55,7 +55,7 @@ class GatewayCommandEntry(BaseModel):
     command: str = Field(..., description="Command that was run, e.g. 'start'")
     timestamp: str = Field(..., description="ISO 8601 timestamp")
     exit_code: int = Field(..., description="Process exit code (0 = success)")
-    output: Optional[str] = Field(None, description="stdout/stderr snippet (max 500 chars)")
+    output: str | None = Field(None, description="stdout/stderr snippet (max 500 chars)")
 
 
 class GatewayHistoryResponse(BaseModel):

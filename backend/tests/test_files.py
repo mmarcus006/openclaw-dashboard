@@ -13,9 +13,10 @@ Covers:
   - Language detection from file extension
 """
 
+from pathlib import Path
+
 import pytest
 from httpx import AsyncClient
-from pathlib import Path
 
 
 class TestFileRead:

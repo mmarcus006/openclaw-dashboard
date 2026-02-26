@@ -14,6 +14,7 @@ Targets uncovered lines in:
 """
 
 import json
+from datetime import UTC
 from pathlib import Path
 from unittest.mock import AsyncMock, patch
 
@@ -32,7 +33,6 @@ from app.services.gateway_service import (
     _extract_uptime,
 )
 from app.services.session_service import SessionService
-
 
 # ---------------------------------------------------------------------------
 # Helper
@@ -964,10 +964,9 @@ class TestFileServiceMisc:
         self, file_service: FileService, mock_openclaw_home: Path,
     ) -> None:
         """get_mtime returns a timezone-aware datetime."""
-        from datetime import timezone
         target = mock_openclaw_home / "workspace" / "AGENTS.md"
         mtime = file_service.get_mtime(target)
-        assert mtime.tzinfo == timezone.utc
+        assert mtime.tzinfo == UTC
 
     def test_detect_language_various_extensions(self, file_service: FileService) -> None:
         """detect_language covers additional extensions."""
@@ -1015,8 +1014,9 @@ class TestConfigServiceBackup:
         self, config_service: ConfigService, mock_openclaw_home: Path,
     ) -> None:
         """After many writes, only 10 backups remain."""
-        from app.models.config import ConfigWriteRequest
         import time
+
+        from app.models.config import ConfigWriteRequest
 
         for i in range(12):
             resp = await config_service.read_config()

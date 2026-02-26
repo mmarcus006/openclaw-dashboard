@@ -1,7 +1,7 @@
 """Shared utility functions."""
 
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from slowapi import Limiter
 from slowapi.util import get_remote_address
@@ -9,7 +9,7 @@ from slowapi.util import get_remote_address
 
 def now_iso() -> str:
     """Return current UTC time as ISO-8601 string."""
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
 
 
 limiter = Limiter(

@@ -315,8 +315,8 @@ def _extract_code_lines(source: str) -> str:
     Returns:
         Concatenated string of code lines only.
     """
-    import tokenize
     import io
+    import tokenize
 
     code_lines = []
     try:

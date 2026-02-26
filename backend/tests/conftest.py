@@ -6,8 +6,8 @@ no file operations touch the real filesystem.
 """
 
 import json
+from collections.abc import AsyncGenerator
 from pathlib import Path
-from typing import AsyncGenerator
 
 import pytest
 import pytest_asyncio
@@ -17,11 +17,10 @@ from app.config import Settings
 from app.main import create_app
 from app.services.agent_service import AgentService
 from app.services.config_service import ConfigService
-from app.services.file_service import FileService
 from app.services.cron_service import CronService
+from app.services.file_service import FileService
 from app.services.gateway_service import GatewayService
 from app.services.session_service import SessionService
-
 
 # ---------------------------------------------------------------------------
 # Core mock home fixture

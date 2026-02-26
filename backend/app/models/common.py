@@ -1,11 +1,11 @@
-from pydantic import BaseModel, Field
 from datetime import datetime
-from typing import Optional
+
+from pydantic import BaseModel, Field
 
 
 class ErrorDetail(BaseModel):
     """Detailed error information."""
-    detail: Optional[dict] = None
+    detail: dict | None = None
 
 
 class ErrorResponse(BaseModel):

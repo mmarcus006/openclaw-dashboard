@@ -5,6 +5,7 @@ path segments.  This avoids URL routing ambiguity with path separators
 and special characters.
 """
 
+from datetime import UTC
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response, status
@@ -185,9 +186,9 @@ async def read_agent_file(
         raise HTTPException(status_code=403, detail=str(exc)) from exc
 
     stat = full_path.stat()
-    from datetime import datetime, timezone
+    from datetime import datetime
 
-    mtime = datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc)
+    mtime = datetime.fromtimestamp(stat.st_mtime, tz=UTC)
 
     # Set ETag header so the frontend can use it in If-Match on write
     response.headers["ETag"] = f'"{etag}"'
@@ -275,9 +276,9 @@ async def write_agent_file(
         raise HTTPException(status_code=403, detail=str(exc)) from exc
 
     stat = full_path.stat()
-    from datetime import datetime, timezone
+    from datetime import datetime
 
-    mtime = datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc)
+    mtime = datetime.fromtimestamp(stat.st_mtime, tz=UTC)
 
     response.headers["ETag"] = f'"{new_etag}"'
 

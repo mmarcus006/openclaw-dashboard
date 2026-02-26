@@ -34,7 +34,6 @@ from app.websocket.live import (
     _envelope,
 )
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -75,6 +74,8 @@ def gateway_service(test_settings: Settings) -> GatewayService:
 @pytest.fixture
 def ws_app(test_settings, agent_service, gateway_service):
     """Create a FastAPI app with overridden dependencies for WS testing."""
+    import os
+
     from app.dependencies import (
         get_agent_service,
         get_config_service,
@@ -87,8 +88,6 @@ def ws_app(test_settings, agent_service, gateway_service):
     from app.services.config_service import ConfigService
     from app.services.cron_service import CronService
     from app.services.session_service import SessionService
-
-    import os
     os.environ["TESTING"] = "1"
 
     app = create_app()

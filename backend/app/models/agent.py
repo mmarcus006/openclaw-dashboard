@@ -1,6 +1,6 @@
-from pydantic import BaseModel, Field
 from datetime import datetime
-from typing import Optional
+
+from pydantic import BaseModel, Field
 
 
 class AgentFileInfo(BaseModel):
@@ -26,7 +26,7 @@ class AgentSummary(BaseModel):
     name: str = Field(..., description="Agent display name")
     model: str = Field(..., description="Model being used")
     status: str = Field(..., description="Agent status: active, idle, stopped")
-    last_activity: Optional[datetime] = Field(None, description="Last activity timestamp")
+    last_activity: datetime | None = Field(None, description="Last activity timestamp")
 
     model_config = {
         "json_schema_extra": {
@@ -48,7 +48,7 @@ class AgentDetailResponse(BaseModel):
     model: str = Field(..., description="Model being used")
     workspace: str = Field(..., description="Path to agent workspace")
     files: list[AgentFileInfo] = Field(default_factory=list, description="List of files in workspace")
-    last_activity: Optional[datetime] = Field(None, description="Last activity timestamp")
+    last_activity: datetime | None = Field(None, description="Last activity timestamp")
     status: str = Field(..., description="Agent status: active, idle, stopped")
 
     model_config = {

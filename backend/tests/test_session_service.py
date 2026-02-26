@@ -5,9 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from app.services.session_service import SessionService
 from app.config import Settings
-
+from app.services.session_service import SessionService
 
 # ---------------------------------------------------------------------------
 # W4.1 Tests — Session List

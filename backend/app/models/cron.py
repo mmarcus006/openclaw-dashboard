@@ -1,7 +1,7 @@
 """Cron job models for the cron viewer."""
 
+
 from pydantic import BaseModel, Field
-from typing import Optional
 
 
 class CronJobEntry(BaseModel):
@@ -9,9 +9,9 @@ class CronJobEntry(BaseModel):
     name: str = Field(..., description="Job name from config")
     schedule: str = Field(..., description="Raw cron expression")
     schedule_human: str = Field(..., description="Human-readable schedule")
-    next_run: Optional[str] = Field(None, description="ISO 8601 next run time")
+    next_run: str | None = Field(None, description="ISO 8601 next run time")
     enabled: bool = Field(..., description="Whether the job is enabled")
-    error: Optional[str] = Field(None, description="Error message if schedule is invalid")
+    error: str | None = Field(None, description="Error message if schedule is invalid")
 
 
 class CronJobListResponse(BaseModel):

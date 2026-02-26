@@ -1,7 +1,7 @@
 """Cron job service — reads cron jobs from openclaw.json config."""
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import structlog
 from croniter import croniter
@@ -36,7 +36,7 @@ class CronService:
             return CronJobListResponse(jobs=[], total=0)
 
         jobs: list[CronJobEntry] = []
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         for name, job_config in cron_jobs.items():
             if not isinstance(job_config, dict):

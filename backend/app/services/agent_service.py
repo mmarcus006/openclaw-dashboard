@@ -15,7 +15,7 @@ No other code may construct agent paths — it must call this function.
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -311,7 +311,7 @@ class AgentService:
                         AgentFileInfo(
                             name=fname.name,
                             size=stat.st_size,
-                            mtime=datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc),
+                            mtime=datetime.fromtimestamp(stat.st_mtime, tz=UTC),
                         )
                     )
                 except OSError:
@@ -326,7 +326,7 @@ class AgentService:
         recursive: bool = False,
         depth: int = 2,
         max_files: int = 200,
-    ) -> "FileListResponse":
+    ) -> FileListResponse:
         """List files in an agent's workspace, optionally recursive.
 
         Args:
@@ -536,7 +536,7 @@ class AgentService:
             if not isinstance(updated_at, (int, float)):
                 continue
             try:
-                ts = datetime.fromtimestamp(updated_at / 1000, tz=timezone.utc)
+                ts = datetime.fromtimestamp(updated_at / 1000, tz=UTC)
                 if latest is None or ts > latest:
                     latest = ts
             except (ValueError, OSError, OverflowError):
@@ -560,7 +560,7 @@ class AgentService:
             return "stopped"
         if last_activity is None:
             return "idle"
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         delta = (now - last_activity).total_seconds()
         if delta <= _STATUS_ACTIVE_THRESHOLD_SECONDS:
             return "active"

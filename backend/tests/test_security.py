@@ -10,10 +10,10 @@ These tests MUST all pass. No security test may be skipped because
 import io
 import re
 import tokenize
-import pytest
-from httpx import ASGITransport, AsyncClient
 from pathlib import Path
 
+import pytest
+from httpx import ASGITransport, AsyncClient
 
 # ---------------------------------------------------------------------------
 # Helper
@@ -62,11 +62,14 @@ class TestHostHeaderValidation:
     async def _client_with_host(self, host: str, mock_openclaw_home, test_settings,
                                  file_service, agent_service, config_service, gateway_service):
         """Create an AsyncClient with a custom Host header."""
-        from app.main import create_app
         from app.dependencies import (
-            get_agent_service, get_config_service, get_file_service,
-            get_gateway_service, get_settings,
+            get_agent_service,
+            get_config_service,
+            get_file_service,
+            get_gateway_service,
+            get_settings,
         )
+        from app.main import create_app
         app = create_app()
         app.dependency_overrides[get_settings] = lambda: test_settings
         app.dependency_overrides[get_file_service] = lambda: file_service
@@ -492,11 +495,14 @@ class TestErrorEnvelope:
         config_service, gateway_service
     ):
         """403 from host validation uses the standard error envelope."""
-        from app.main import create_app
         from app.dependencies import (
-            get_agent_service, get_config_service, get_file_service,
-            get_gateway_service, get_settings,
+            get_agent_service,
+            get_config_service,
+            get_file_service,
+            get_gateway_service,
+            get_settings,
         )
+        from app.main import create_app
         app = create_app()
         app.dependency_overrides[get_settings] = lambda: test_settings
         app.dependency_overrides[get_file_service] = lambda: file_service

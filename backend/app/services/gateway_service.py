@@ -174,7 +174,7 @@ class GatewayService:
             raw_out, raw_err = await asyncio.wait_for(
                 proc.communicate(), timeout=_SUBPROCESS_TIMEOUT
             )
-        except asyncio.TimeoutError:
+        except TimeoutError:
             proc.kill()
             await proc.communicate()  # drain pipes after kill
             raise TimeoutError(

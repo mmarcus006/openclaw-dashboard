@@ -5,7 +5,7 @@ error shape defined in models/common.py.
 """
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import structlog
 from fastapi import HTTPException, Request
@@ -41,7 +41,7 @@ def _build_error_body(
             "code": code,
             "message": message,
             "detail": detail or {},
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
     }
 

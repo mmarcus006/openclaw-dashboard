@@ -9,7 +9,7 @@ Handles:
 
 import json
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import structlog
@@ -195,7 +195,7 @@ class ConfigService:
         if not config_path.exists():
             return
 
-        ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        ts = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
         backup_path = config_path.with_suffix(f".json.bak.{ts}")
 
         try:

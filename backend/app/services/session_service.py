@@ -255,7 +255,10 @@ class SessionService:
             updated_at=data.get("updatedAt", 0),
             model=data.get("model"),
             model_provider=data.get("modelProvider"),
-            label=data.get("label") or data.get("origin", {}).get("label") if isinstance(data.get("origin"), dict) else data.get("label"),
+            label=(
+                data.get("label")
+                or (data.get("origin", {}).get("label") if isinstance(data.get("origin"), dict) else data.get("label"))
+            ),
             spawned_by=data.get("spawnedBy"),
             total_tokens=data.get("totalTokens"),
             input_tokens=data.get("inputTokens"),

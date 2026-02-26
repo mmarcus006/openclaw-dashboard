@@ -27,16 +27,16 @@ File watching scope (R1.2 — specific files only, NOT recursive):
 
 import asyncio
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 import structlog
 from fastapi import WebSocket, WebSocketDisconnect
-from watchfiles import awatch, Change
+from watchfiles import Change, awatch
 
 from app.config import settings as _settings
-from app.services.agent_service import AgentService, WORKSPACE_FILES
+from app.services.agent_service import WORKSPACE_FILES, AgentService
 from app.services.gateway_service import GatewayService
 
 logger = structlog.get_logger(__name__)
@@ -341,6 +341,6 @@ def _envelope(event_type: str, payload: dict[str, Any]) -> dict:
     """
     return {
         "type": event_type,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "payload": payload,
     }

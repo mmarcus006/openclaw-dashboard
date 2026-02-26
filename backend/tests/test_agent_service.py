@@ -10,7 +10,7 @@ Covers:
   - now_iso() utility function
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -40,7 +40,7 @@ class TestLastActivity:
         result = agent_service._last_activity("main", sessions)
         assert result is not None
         # Should return the most recent one (1772031239308 > 1772031200000)
-        expected = datetime.fromtimestamp(1772031239308 / 1000, tz=timezone.utc)
+        expected = datetime.fromtimestamp(1772031239308 / 1000, tz=UTC)
         assert result == expected
 
     def test_last_activity_ms_timestamp(self, agent_service: AgentService):
@@ -52,7 +52,7 @@ class TestLastActivity:
         }
         result = agent_service._last_activity("test", sessions)
         assert result is not None
-        expected = datetime.fromtimestamp(1700000000, tz=timezone.utc)
+        expected = datetime.fromtimestamp(1700000000, tz=UTC)
         assert result == expected
 
     def test_last_activity_no_matching_sessions(self, agent_service: AgentService):

@@ -1,5 +1,5 @@
+
 from pydantic import BaseModel, Field
-from typing import Optional
 
 
 class ConfigResponse(BaseModel):
@@ -49,7 +49,7 @@ class ConfigValidateResponse(BaseModel):
 class ConfigWriteRequest(BaseModel):
     """Request body for writing configuration."""
     config: dict = Field(..., description="Configuration object to save")
-    etag: Optional[str] = Field(None, description="ETag for concurrency control")
+    etag: str | None = Field(None, description="ETag for concurrency control")
 
     model_config = {
         "json_schema_extra": {

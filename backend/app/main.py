@@ -21,12 +21,11 @@ from fastapi import Depends, FastAPI, WebSocket
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from starlette.exceptions import HTTPException as StarletteHTTPException
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.config import settings
-from app.utils import limiter
 from app.dependencies import get_agent_service, get_gateway_service
 from app.middleware.error_handler import (
     GlobalExceptionHandlerMiddleware,
@@ -37,6 +36,7 @@ from app.middleware.host_validation import HostValidationMiddleware
 from app.routers import agents, config, cron, gateway, health, sessions
 from app.services.agent_service import AgentService
 from app.services.gateway_service import GatewayService
+from app.utils import limiter
 from app.websocket.live import websocket_handler
 
 # ---------------------------------------------------------------------------
