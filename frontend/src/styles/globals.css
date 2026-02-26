@@ -1,5 +1,41 @@
 @import "tailwindcss";
 
+/*
+ * Tailwind v4 @theme block — registers CSS custom properties as Tailwind utilities.
+ * This makes bg-bg-primary, text-text-secondary, border-border, bg-success, etc. work.
+ * The :root block below keeps the raw CSS vars available for non-Tailwind usage.
+ */
+@theme {
+  /* Backgrounds */
+  --color-bg-primary: #0f1219;
+  --color-bg-secondary: #1a1f2e;
+  --color-bg-card: #232936;
+  --color-bg-hover: #2d3548;
+  --color-bg-elevated: #1a1f2e;
+
+  /* Borders */
+  --color-border: #333d52;
+  --color-border-subtle: #252b3b;
+  --color-border-strong: #4a5568;
+
+  /* Text */
+  --color-text-primary: #e8eaf0;
+  --color-text-secondary: #a1abbe;
+  --color-text-tertiary: #6b7896;
+  --color-text-inverse: #0f1219;
+
+  /* Accent */
+  --color-accent: #6366f1;
+  --color-accent-hover: #818cf8;
+
+  /* Status */
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #3b82f6;
+  --color-warning-contrast: #fbbf24;
+}
+
 :root {
   --bg-primary: #0f1219;
   --bg-secondary: #1a1f2e;
