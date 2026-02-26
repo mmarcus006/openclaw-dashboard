@@ -16,6 +16,7 @@ from app.models.agent import AgentDetailResponse, AgentListResponse
 from app.models.common import FileContentResponse, SaveResponse
 from app.services.agent_service import AgentService
 from app.services.file_service import FileService
+from app.utils import now_iso
 
 router = APIRouter(prefix="/agents", tags=["agents"])
 
@@ -222,7 +223,7 @@ async def write_agent_file(
                     "code": "CONFLICT",
                     "message": str(exc),
                     "detail": {"current_etag": exc.current_etag, "path": path},
-                    "timestamp": _now_iso(),
+                    "timestamp": now_iso(),
                 }
             },
         )
@@ -275,8 +276,3 @@ def _resolve_workspace_path(workspace: Path, relative_path: str) -> Path:
     return workspace / relative_path
 
 
-def _now_iso() -> str:
-    """Return current UTC time as ISO-8601 string."""
-    from datetime import datetime, timezone
-
-    return datetime.now(timezone.utc).isoformat()

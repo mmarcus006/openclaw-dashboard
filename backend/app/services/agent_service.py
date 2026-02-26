@@ -13,7 +13,6 @@ No other code may construct agent paths — it must call this function.
 """
 
 import json
-import logging
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -147,7 +146,7 @@ class AgentService:
             )
 
         files = await self._list_workspace_files(workspace)
-        name, model = self._extract_agent_meta(agent_id, openclaw_cfg)
+        name, model = self._extract_agent_meta(agent_id, openclaw_cfg, sessions_index)
         last_activity = self._last_activity(agent_id, sessions_index)
         status = self._compute_status(last_activity, workspace)
 
@@ -180,14 +179,13 @@ class AgentService:
                 if entry.is_dir() and entry.name not in ids:
                     ids.append(entry.name)
 
-        # Scan workspace-* siblings of OPENCLAW_HOME
+        # Scan workspace-* directories inside OPENCLAW_HOME
         home = self._settings.OPENCLAW_HOME
-        if home.parent.exists():
-            for entry in sorted(home.parent.iterdir()):
+        if home.exists():
+            for entry in sorted(home.iterdir()):
                 if (
                     entry.is_dir()
                     and entry.name.startswith("workspace-")
-                    and entry.name != "workspace"
                 ):
                     aid = entry.name[len("workspace-"):]
                     if aid not in ids:
@@ -252,9 +250,9 @@ class AgentService:
         if not workspace.exists():
             return files
 
-        # Top-level known files
+        # Top-level known files — filter against WORKSPACE_FILES set
         for fname in sorted(workspace.iterdir(), key=lambda p: p.name):
-            if fname.is_file():
+            if fname.is_file() and fname.name in WORKSPACE_FILES:
                 try:
                     stat = fname.stat()
                     files.append(
@@ -270,17 +268,27 @@ class AgentService:
         return files
 
     def _extract_agent_meta(
-        self, agent_id: str, cfg: dict
+        self, agent_id: str, cfg: dict, sessions: dict | None = None
     ) -> tuple[str, str]:
-        """Extract display name and model from openclaw.json.
+        """Extract display name and model from sessions + openclaw.json.
+
+        Model priority:
+        1. Most recent session model (from sessions.json)
+        2. Agent-specific config in openclaw.json
+        3. Default config in openclaw.json
+        4. "unknown"
 
         Args:
             agent_id: Agent identifier string.
             cfg: Parsed openclaw.json dict.
+            sessions: Parsed sessions.json dict (optional).
 
         Returns:
             Tuple of (display_name, model_string).
         """
+        # Try session model first (most accurate for what agent actually used)
+        session_model = self._session_model(agent_id, sessions) if sessions else None
+
         agents_cfg = cfg.get("agents", {})
         defaults = agents_cfg.get("defaults", {}) if isinstance(agents_cfg, dict) else {}
         raw_cfg = agents_cfg.get(agent_id, {}) if isinstance(agents_cfg, dict) else {}
@@ -294,7 +302,7 @@ class AgentService:
         )
         # model may be a dict like {"primary": "...", "fallback": [...]}
         if isinstance(model_raw, dict):
-            model = (
+            config_model = (
                 model_raw.get("primary")
                 or next(
                     (v for v in model_raw.values() if isinstance(v, str)),
@@ -302,17 +310,56 @@ class AgentService:
                 )
             )
         elif isinstance(model_raw, str):
-            model = model_raw
+            config_model = model_raw
         else:
-            model = "unknown"
+            config_model = "unknown"
+
+        model = session_model or config_model
 
         # Try to read name from workspace IDENTITY.md or SOUL.md
         name = agent_cfg.get("name") or agent_id.title()
 
         return name, model
 
+    def _session_model(self, agent_id: str, sessions: dict) -> str | None:
+        """Find the model from the most recent session for this agent.
+
+        Args:
+            agent_id: Agent identifier string.
+            sessions: Parsed sessions.json dict.
+
+        Returns:
+            Model string from the most recent session, or None.
+        """
+        if not isinstance(sessions, dict):
+            return None
+
+        prefix = f"agent:{agent_id}:"
+        latest_ts: int | float = -1
+        latest_model: str | None = None
+
+        for key, session_data in sessions.items():
+            if not key.startswith(prefix):
+                continue
+            if not isinstance(session_data, dict):
+                continue
+            updated_at = session_data.get("updatedAt")
+            if not isinstance(updated_at, (int, float)):
+                continue
+            if updated_at > latest_ts:
+                model = session_data.get("model")
+                if isinstance(model, str) and model:
+                    latest_ts = updated_at
+                    latest_model = model
+
+        return latest_model
+
     def _last_activity(self, agent_id: str, sessions: dict) -> datetime | None:
-        """Determine the last activity timestamp for an agent from sessions.
+        """Find most recent updatedAt across all sessions for this agent.
+
+        sessions.json keys are session keys like "agent:main:main",
+        "agent:main:subagent:uuid", "agent:main:whatsapp:...".
+        Values are dicts with updatedAt as int (ms Unix timestamp).
 
         Args:
             agent_id: Agent identifier string.
@@ -321,28 +368,26 @@ class AgentService:
         Returns:
             UTC datetime of last activity, or None if unknown.
         """
-        # sessions.json schema is flexible — try a few common shapes
-        if isinstance(sessions, dict):
-            agent_sessions = sessions.get(agent_id, [])
-        elif isinstance(sessions, list):
-            agent_sessions = [s for s in sessions if s.get("agent") == agent_id]
-        else:
-            agent_sessions = []
-
-        if not agent_sessions:
+        if not isinstance(sessions, dict):
             return None
 
-        # Find the most recent session
+        prefix = f"agent:{agent_id}:"
         latest: datetime | None = None
-        for sess in agent_sessions:
-            ts_str = sess.get("updated_at") or sess.get("created_at") or sess.get("timestamp")
-            if ts_str:
-                try:
-                    ts = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
-                    if latest is None or ts > latest:
-                        latest = ts
-                except (ValueError, AttributeError):
-                    pass
+
+        for key, session_data in sessions.items():
+            if not key.startswith(prefix):
+                continue
+            if not isinstance(session_data, dict):
+                continue
+            updated_at = session_data.get("updatedAt")
+            if not isinstance(updated_at, (int, float)):
+                continue
+            try:
+                ts = datetime.fromtimestamp(updated_at / 1000, tz=timezone.utc)
+                if latest is None or ts > latest:
+                    latest = ts
+            except (ValueError, OSError, OverflowError):
+                pass
 
         return latest
 
@@ -385,7 +430,7 @@ class AgentService:
             AgentSummary instance.
         """
         workspace = self.resolve_agent_workspace(agent_id)
-        name, model = self._extract_agent_meta(agent_id, openclaw_cfg)
+        name, model = self._extract_agent_meta(agent_id, openclaw_cfg, sessions_index)
         last_activity = self._last_activity(agent_id, sessions_index)
         status = self._compute_status(last_activity, workspace)
 

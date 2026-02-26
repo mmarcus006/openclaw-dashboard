@@ -27,7 +27,6 @@ File watching scope (R1.2 — specific files only, NOT recursive):
 
 import asyncio
 import json
-import logging
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any

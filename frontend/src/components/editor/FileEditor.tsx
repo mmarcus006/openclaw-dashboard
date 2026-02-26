@@ -64,6 +64,7 @@ export function FileEditor(): React.ReactElement {
     const handler = (e: BeforeUnloadEvent) => {
       if (currentFile?.dirty) {
         e.preventDefault();
+        e.returnValue = '';
       }
     };
     window.addEventListener('beforeunload', handler);

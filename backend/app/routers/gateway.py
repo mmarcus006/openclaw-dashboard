@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from app.dependencies import get_gateway_service
 from app.models.gateway import CommandResponse, GatewayAction, GatewayStatusResponse
 from app.services.gateway_service import GatewayService
+from app.utils import limiter
 
 router = APIRouter(prefix="/gateway", tags=["gateway"])
 
@@ -53,6 +54,7 @@ async def get_gateway_status(
         504: {"description": "Gateway command timed out"},
     },
 )
+@limiter.limit("5/minute")
 async def gateway_command(
     action: GatewayAction,
     request: Request,

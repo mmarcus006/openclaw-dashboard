@@ -303,7 +303,6 @@ class TestSymlinkSandbox:
         self, async_client: AsyncClient, mock_openclaw_home: Path
     ):
         """A symlink in the workspace pointing outside the sandbox is blocked."""
-        import os
         workspace = mock_openclaw_home / "workspace"
         # Create a symlink pointing to /tmp (outside sandbox)
         symlink_path = workspace / "evil_link.md"

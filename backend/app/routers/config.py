@@ -4,7 +4,7 @@ Manages read/write of openclaw.json with ETag concurrency control and
 backup rotation via ConfigService.
 """
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response, status
 from fastapi.responses import JSONResponse
 
 from app.dependencies import get_config_service
@@ -15,6 +15,7 @@ from app.models.config import (
     ConfigWriteRequest,
 )
 from app.services.config_service import ConfigService
+from app.utils import limiter, now_iso
 
 router = APIRouter(prefix="/config", tags=["config"])
 
@@ -34,11 +35,13 @@ router = APIRouter(prefix="/config", tags=["config"])
     },
 )
 async def get_config(
+    response: Response,
     config_svc: ConfigService = Depends(get_config_service),
 ) -> ConfigResponse:
     """Return the current OpenClaw configuration.
 
     Args:
+        response: FastAPI response object (used to set ETag header).
         config_svc: ConfigService (injected).
 
     Returns:
@@ -49,7 +52,9 @@ async def get_config(
         HTTPException 422: If the file is not valid JSON.
     """
     try:
-        return await config_svc.read_config()
+        result = await config_svc.read_config()
+        response.headers["ETag"] = f'"{result.etag}"'
+        return result
     except FileNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except Exception as exc:  # JSONDecodeError etc.  noqa: BLE001
@@ -72,6 +77,7 @@ async def get_config(
         429: {"description": "Rate limit exceeded"},
     },
 )
+@limiter.limit("5/minute")
 async def put_config(
     request: Request,
     body: ConfigWriteRequest,
@@ -108,7 +114,7 @@ async def put_config(
                     "code": "CONFLICT",
                     "message": str(exc),
                     "detail": {"current_etag": exc.current_etag},
-                    "timestamp": _now_iso(),
+                    "timestamp": now_iso(),
                 }
             },
         )
@@ -143,13 +149,3 @@ async def validate_config(
     """
     return await config_svc.validate_config(body.config)
 
-
-# ---------------------------------------------------------------------------
-# Internal helpers
-# ---------------------------------------------------------------------------
-
-def _now_iso() -> str:
-    """Return current UTC time as ISO-8601 string."""
-    from datetime import datetime, timezone
-
-    return datetime.now(timezone.utc).isoformat()

@@ -8,9 +8,13 @@ import { AgentGrid } from '@/components/agents/AgentGrid';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { useAgents } from '@/hooks/useAgents';
 import { useGatewayStore } from '@/stores/gatewayStore';
+import type { AgentSummary } from '@/types';
 
-function DashboardStats(): React.ReactElement {
-  const { agents } = useAgents();
+interface DashboardStatsProps {
+  agents: AgentSummary[];
+}
+
+function DashboardStats({ agents }: DashboardStatsProps): React.ReactElement {
   const gatewayStatus = useGatewayStore((s) => s.status);
 
   const activeCount = agents.filter((a) => a.status === 'active').length;
@@ -23,7 +27,7 @@ function DashboardStats(): React.ReactElement {
       </div>
       <div className="bg-bg-card border border-border rounded-lg p-4">
         <p className="text-text-secondary text-xs mb-1">Active</p>
-        <p className="text-success font-semibold text-2xl">{activeCount}</p>
+        <p className={`font-semibold text-2xl ${activeCount > 0 ? 'text-success' : 'text-text-secondary'}`}>{activeCount}</p>
       </div>
       <div className="bg-bg-card border border-border rounded-lg p-4">
         <p className="text-text-secondary text-xs mb-1">Gateway</p>
@@ -46,7 +50,7 @@ function DashboardContent(): React.ReactElement {
 
   return (
     <>
-      <DashboardStats />
+      <DashboardStats agents={agents} />
       <AgentGrid agents={agents} loading={loading} error={error} />
     </>
   );

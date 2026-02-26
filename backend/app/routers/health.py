@@ -1,7 +1,6 @@
 """Health check router — GET /api/health."""
 
 import shutil
-from pathlib import Path
 
 from fastapi import APIRouter, Depends
 

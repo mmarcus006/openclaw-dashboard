@@ -10,7 +10,6 @@ Security rules (R6):
 
 import asyncio
 import shutil
-from datetime import datetime, timezone
 
 import structlog
 
@@ -180,7 +179,7 @@ class GatewayService:
         Returns:
             GatewayStatusResponse (may be degraded if parsing fails).
         """
-        combined = stdout + "\n" + stderr
+        _ = stdout + "\n" + stderr  # kept for future debug logging
 
         # Non-zero exit typically means the gateway is not running
         if returncode != 0:

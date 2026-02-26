@@ -88,18 +88,25 @@ def mock_openclaw_home(tmp_path: Path) -> Path:
     }
     (tmp_path / "openclaw.json").write_text(json.dumps(config, indent=2))
 
-    # Sessions
+    # Sessions — use real sessions.json format (keys are session keys, updatedAt is ms)
     sessions_dir = tmp_path / "sessions"
     sessions_dir.mkdir()
     sessions_data = {
-        "main": [
-            {
-                "id": "session-001",
-                "agent": "main",
-                "updated_at": "2026-02-25T05:54:00+00:00",
-                "created_at": "2026-02-25T05:00:00+00:00",
-            }
-        ]
+        "agent:main:main": {
+            "sessionId": "session-001",
+            "updatedAt": 1772031239308,
+            "model": "claude-opus-4-6",
+            "modelProvider": "anthropic",
+            "totalTokens": 5000,
+            "inputTokens": 2000,
+            "outputTokens": 3000,
+        },
+        "agent:coder:main": {
+            "sessionId": "session-002",
+            "updatedAt": 1772020000000,
+            "model": "claude-sonnet-4-6",
+            "modelProvider": "anthropic",
+        },
     }
     (sessions_dir / "sessions.json").write_text(json.dumps(sessions_data))
 
@@ -217,6 +224,10 @@ async def async_client(
     app.dependency_overrides[get_agent_service] = lambda: agent_service
     app.dependency_overrides[get_config_service] = lambda: config_service
     app.dependency_overrides[get_gateway_service] = lambda: gateway_service
+
+    # Disable rate limiter in tests (env set below ensures limiter.enabled=False)
+    import os
+    os.environ["TESTING"] = "1"
 
     transport = ASGITransport(app=app)
     async with AsyncClient(

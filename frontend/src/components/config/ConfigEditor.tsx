@@ -62,7 +62,7 @@ export function ConfigEditor(): React.ReactElement {
 
   // beforeunload on dirty
   useEffect(() => {
-    const handler = (e: BeforeUnloadEvent) => { if (dirty) e.preventDefault(); };
+    const handler = (e: BeforeUnloadEvent) => { if (dirty) { e.preventDefault(); e.returnValue = ''; } };
     window.addEventListener('beforeunload', handler);
     return () => window.removeEventListener('beforeunload', handler);
   }, [dirty]);

@@ -11,8 +11,8 @@ import { ToastContainer } from '@/components/common/Toast';
 import { useWebSocket } from '@/hooks/useWebSocket';
 
 /**
- * Mounts the singleton WebSocket connection at app root.
- * Must render inside RouterProvider context so it persists across navigations.
+ * Mounts the singleton WebSocket connection at app root (sibling of RouterProvider).
+ * Singleton logic in useWebSocket ensures only one connection is ever created.
  * Renders null — only here for the useEffect in useWebSocket.
  */
 function WsInitializer(): null {

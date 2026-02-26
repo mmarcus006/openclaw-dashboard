@@ -61,7 +61,7 @@ export function Header({ title }: HeaderProps): React.ReactElement {
   return (
     <header className="h-12 flex-shrink-0 bg-bg-secondary border-b border-border flex items-center justify-between px-6">
       {title ? (
-        <h1 className="text-text-primary text-sm font-semibold truncate">{title}</h1>
+        <h1 className="text-text-primary text-base font-semibold truncate">{title}</h1>
       ) : (
         <span />
       )}

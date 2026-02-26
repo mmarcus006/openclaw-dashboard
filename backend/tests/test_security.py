@@ -13,7 +13,6 @@ import tokenize
 import pytest
 from httpx import ASGITransport, AsyncClient
 from pathlib import Path
-from unittest.mock import patch
 
 
 # ---------------------------------------------------------------------------
@@ -449,7 +448,6 @@ class TestCORSPolicy:
 
     def test_cors_never_wildcard_in_main_py(self):
         """main.py must not use allow_origins=['*'] or allow_origins=["*"]."""
-        import re
         main_file = Path(__file__).parent.parent / "app" / "main.py"
         source = main_file.read_text()
         # Specifically check allow_origins is not set to wildcard

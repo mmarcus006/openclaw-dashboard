@@ -1,11 +1,12 @@
 """Host header validation middleware — DNS rebinding protection (R5)."""
 
-import json
 import logging
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
+
+from app.utils import now_iso
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +44,7 @@ class HostValidationMiddleware(BaseHTTPMiddleware):
                         "message": f"Host '{host_header}' is not allowed. "
                                    "Only localhost connections are permitted.",
                         "detail": {"host": host_header},
-                        "timestamp": _now_iso(),
+                        "timestamp": now_iso(),
                     }
                 },
             )
@@ -51,8 +52,3 @@ class HostValidationMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 
-def _now_iso() -> str:
-    """Return current UTC time as ISO-8601 string."""
-    from datetime import datetime, timezone
-
-    return datetime.now(timezone.utc).isoformat()

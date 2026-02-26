@@ -20,14 +20,13 @@ import structlog
 from fastapi import Depends, FastAPI, WebSocket
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
 from app.config import settings
+from app.utils import limiter
 from app.dependencies import get_agent_service, get_gateway_service
 from app.middleware.error_handler import (
     GlobalExceptionHandlerMiddleware,
@@ -68,12 +67,6 @@ logging.basicConfig(
 )
 
 logger = structlog.get_logger(__name__)
-
-# ---------------------------------------------------------------------------
-# Rate limiter (slowapi)
-# ---------------------------------------------------------------------------
-
-limiter = Limiter(key_func=get_remote_address)
 
 # ---------------------------------------------------------------------------
 # Startup validation

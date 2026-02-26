@@ -40,9 +40,9 @@ export function AgentCard({ agent, onClick }: AgentCardProps): React.ReactElemen
         </div>
         {/* Status dot */}
         <span
-          className={`w-2.5 h-2.5 rounded-full flex-shrink-0 mt-0.5 ${
+          className={`w-3 h-3 rounded-full flex-shrink-0 mt-0.5 ${
             agent.status === 'active'
-              ? 'bg-success'
+              ? 'bg-success animate-pulse'
               : agent.status === 'idle'
               ? 'bg-warning'
               : 'bg-text-secondary'

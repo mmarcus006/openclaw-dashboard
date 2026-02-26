@@ -33,18 +33,18 @@ export function Sidebar(): React.ReactElement {
       </div>
 
       {/* Navigation */}
-      <nav aria-label="Main navigation" className="flex-1 px-2 py-4 space-y-1">
+      <nav aria-label="Main navigation" className="flex-1 py-4 space-y-1">
         {NAV_ITEMS.map(({ to, label, Icon }) => (
           <NavLink
             key={to}
             to={to}
             end={to === '/'}
             className={({ isActive }) => `
-              flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors
+              flex items-center gap-3 py-2 text-sm font-medium transition-colors border-l-2
               focus:outline-none focus-visible:ring-2 focus-visible:ring-accent
               ${isActive
-                ? 'bg-accent/15 text-accent'
-                : 'text-text-secondary hover:text-text-primary hover:bg-bg-hover'
+                ? 'bg-accent/20 text-accent border-accent pl-[10px]'
+                : 'text-text-secondary hover:text-text-primary hover:bg-bg-hover border-transparent pl-[10px]'
               }
             `}
           >

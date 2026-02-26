@@ -8,8 +8,7 @@ Covers:
   - Degraded response when CLI is unavailable
 """
 
-import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from httpx import AsyncClient
@@ -316,7 +315,6 @@ def _extract_code_lines(source: str) -> str:
     Returns:
         Concatenated string of code lines only.
     """
-    import ast
     import tokenize
     import io
 
