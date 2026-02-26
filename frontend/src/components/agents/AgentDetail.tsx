@@ -1,15 +1,18 @@
 /**
- * AgentDetail — agent detail view with flat file list.
+ * AgentDetail — agent detail view with tabbed Files | Sessions.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, FolderOpen } from 'lucide-react';
+import { ArrowLeft, FolderOpen, FileText, MessageSquare } from 'lucide-react';
 import { getFileIcon } from '@/utils/fileIcons';
 import { Badge, statusVariant } from '@/components/common/Badge';
 import { Button } from '@/components/common/Button';
 import { Card } from '@/components/common/Card';
 import { Spinner } from '@/components/common/Spinner';
+import { SessionList } from '@/components/sessions/SessionList';
+import { SessionViewer } from '@/components/sessions/SessionViewer';
+import { useSessionStore } from '@/stores/sessionStore';
 import type { AgentDetailResponse, AgentFileInfo } from '@/types';
 
 interface AgentDetailProps {
@@ -77,13 +80,21 @@ function FileRow({ file, agentId }: FileRowProps): React.ReactElement {
   );
 }
 
+type TabId = 'files' | 'sessions';
+
 export function AgentDetail({ agent, loading, error }: AgentDetailProps): React.ReactElement {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<TabId>('files');
+  const clearSessions = useSessionStore((s) => s.clearSessions);
+
+  React.useEffect(() => {
+    return () => clearSessions();
+  }, [clearSessions]);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <Spinner size="lg" label="Loading agent…" />
+        <Spinner size="lg" label="Loading agent..." />
       </div>
     );
   }
@@ -100,7 +111,7 @@ export function AgentDetail({ agent, loading, error }: AgentDetailProps): React.
   }
 
   return (
-    <div className="max-w-4xl">
+    <div className="max-w-5xl">
       {/* Back button */}
       <Button
         variant="ghost"
@@ -130,41 +141,74 @@ export function AgentDetail({ agent, loading, error }: AgentDetailProps): React.
         </div>
       </Card>
 
-      {/* File list */}
-      <Card className="p-0 overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-          <h3 className="text-text-primary font-medium text-sm">
-            Workspace Files ({(agent.files ?? []).length})
-          </h3>
-        </div>
+      {/* Tabs */}
+      <div className="flex gap-0 border-b border-border mb-0">
+        <button
+          onClick={() => setActiveTab('files')}
+          className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+            activeTab === 'files'
+              ? 'border-accent text-accent'
+              : 'border-transparent text-text-secondary hover:text-text-primary'
+          }`}
+        >
+          <FileText size={14} />
+          Files ({(agent.files ?? []).length})
+        </button>
+        <button
+          onClick={() => setActiveTab('sessions')}
+          className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+            activeTab === 'sessions'
+              ? 'border-accent text-accent'
+              : 'border-transparent text-text-secondary hover:text-text-primary'
+          }`}
+        >
+          <MessageSquare size={14} />
+          Sessions
+        </button>
+      </div>
 
-        {(agent.files ?? []).length === 0 ? (
-          <div className="py-10 text-center">
-            <p className="text-text-secondary text-sm">No files found in workspace</p>
+      {/* Tab content */}
+      {activeTab === 'files' ? (
+        <Card className="p-0 overflow-hidden rounded-t-none border-t-0">
+          {(agent.files ?? []).length === 0 ? (
+            <div className="py-10 text-center">
+              <p className="text-text-secondary text-sm">No files found in workspace</p>
+            </div>
+          ) : (
+            <table className="w-full" role="grid" aria-label="Workspace files">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="py-2 px-4 text-left text-text-secondary text-xs font-medium uppercase tracking-wide">
+                    Name
+                  </th>
+                  <th className="py-2 px-4 text-right text-text-secondary text-xs font-medium uppercase tracking-wide">
+                    Size
+                  </th>
+                  <th className="py-2 px-4 text-right text-text-secondary text-xs font-medium uppercase tracking-wide">
+                    Modified
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {(agent.files ?? []).map((file) => (
+                  <FileRow key={file.name} file={file} agentId={agent.id} />
+                ))}
+              </tbody>
+            </table>
+          )}
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(300px,380px)_1fr] gap-0 border border-border rounded-b-lg overflow-hidden bg-bg-card">
+          {/* Session list */}
+          <div className="border-r border-border max-h-[600px] overflow-y-auto">
+            <SessionList agentId={agent.id} />
           </div>
-        ) : (
-          <table className="w-full" role="grid" aria-label="Workspace files">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="py-2 px-4 text-left text-text-secondary text-xs font-medium uppercase tracking-wide">
-                  Name
-                </th>
-                <th className="py-2 px-4 text-right text-text-secondary text-xs font-medium uppercase tracking-wide">
-                  Size
-                </th>
-                <th className="py-2 px-4 text-right text-text-secondary text-xs font-medium uppercase tracking-wide">
-                  Modified
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {(agent.files ?? []).map((file) => (
-                <FileRow key={file.name} file={file} agentId={agent.id} />
-              ))}
-            </tbody>
-          </table>
-        )}
-      </Card>
+          {/* Message viewer */}
+          <div className="p-4 max-h-[600px] overflow-y-auto">
+            <SessionViewer />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

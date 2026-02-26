@@ -34,7 +34,7 @@ from app.middleware.error_handler import (
     validation_exception_handler,
 )
 from app.middleware.host_validation import HostValidationMiddleware
-from app.routers import agents, config, cron, gateway, health
+from app.routers import agents, config, cron, gateway, health, sessions
 from app.services.agent_service import AgentService
 from app.services.gateway_service import GatewayService
 from app.websocket.live import websocket_handler
@@ -216,6 +216,7 @@ def create_app() -> FastAPI:
     app.include_router(config.router, prefix=api_prefix)
     app.include_router(gateway.router, prefix=api_prefix)
     app.include_router(cron.router, prefix=api_prefix)
+    app.include_router(sessions.router, prefix=api_prefix)
 
     # ------------------------------------------------------------------
     # WebSocket

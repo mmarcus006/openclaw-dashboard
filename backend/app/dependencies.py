@@ -12,6 +12,7 @@ from app.services.config_service import ConfigService
 from app.services.file_service import FileService
 from app.services.cron_service import CronService
 from app.services.gateway_service import GatewayService
+from app.services.session_service import SessionService
 
 
 @lru_cache(maxsize=1)
@@ -62,6 +63,16 @@ def get_gateway_service() -> GatewayService:
         GatewayService wrapping the openclaw CLI subprocess.
     """
     return GatewayService(settings=_settings)
+
+
+@lru_cache(maxsize=1)
+def get_session_service() -> SessionService:
+    """Return the singleton SessionService instance.
+
+    Returns:
+        SessionService that reads sessions.json and JSONL files.
+    """
+    return SessionService(settings=_settings)
 
 
 @lru_cache(maxsize=1)

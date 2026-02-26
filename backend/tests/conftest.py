@@ -20,6 +20,7 @@ from app.services.config_service import ConfigService
 from app.services.file_service import FileService
 from app.services.cron_service import CronService
 from app.services.gateway_service import GatewayService
+from app.services.session_service import SessionService
 
 
 # ---------------------------------------------------------------------------
@@ -186,6 +187,19 @@ def gateway_service(test_settings: Settings) -> GatewayService:
 
 
 @pytest.fixture
+def session_service(test_settings: Settings) -> SessionService:
+    """Return a SessionService using the mock home.
+
+    Args:
+        test_settings: Test settings pointing to temp dir.
+
+    Returns:
+        SessionService instance.
+    """
+    return SessionService(settings=test_settings)
+
+
+@pytest.fixture
 def cron_service(test_settings: Settings) -> CronService:
     """Return a CronService using the mock home.
 
@@ -210,6 +224,7 @@ async def async_client(
     config_service: ConfigService,
     gateway_service: GatewayService,
     cron_service: CronService,
+    session_service: SessionService,
 ) -> AsyncGenerator[AsyncClient, None]:
     """Return an async HTTP client wired to the test FastAPI app.
 
@@ -222,6 +237,7 @@ async def async_client(
         config_service: ConfigService pointing to temp dir.
         gateway_service: GatewayService pointing to temp dir.
         cron_service: CronService pointing to temp dir.
+        session_service: SessionService pointing to temp dir.
 
     Yields:
         AsyncClient that sends requests to the test app.
@@ -232,6 +248,7 @@ async def async_client(
         get_cron_service,
         get_file_service,
         get_gateway_service,
+        get_session_service,
         get_settings,
     )
 
@@ -242,6 +259,7 @@ async def async_client(
     app.dependency_overrides[get_config_service] = lambda: config_service
     app.dependency_overrides[get_gateway_service] = lambda: gateway_service
     app.dependency_overrides[get_cron_service] = lambda: cron_service
+    app.dependency_overrides[get_session_service] = lambda: session_service
 
     # Disable rate limiter in tests (env set below ensures limiter.enabled=False)
     import os
