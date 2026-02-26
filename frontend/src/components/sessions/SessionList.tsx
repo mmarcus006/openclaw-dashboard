@@ -113,9 +113,16 @@ export function SessionList({ agentId }: SessionListProps): React.ReactElement {
 
   if (error) {
     return (
-      <div className="text-center py-8">
-        <p className="text-danger text-sm">{error}</p>
-      </div>
+      <EmptyState
+        icon={<AlertTriangle size={40} />}
+        title="Could not load sessions"
+        description={error}
+        action={
+          <Button variant="secondary" size="sm" onClick={() => void fetchSessions(agentId)}>
+            Retry
+          </Button>
+        }
+      />
     );
   }
 

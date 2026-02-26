@@ -43,6 +43,10 @@ WORKSPACE_FILES = {
     "PROJECT.md",
 }
 
+# macOS / Spotlight junk files to exclude from file listings
+JUNK_FILES = {".DS_Store", ".DS_Store?", ".Spotlight-V100", ".Trashes"}
+JUNK_PREFIXES = ("._",)
+
 # Directories to exclude from recursive listing
 EXCLUDE_DIRS = {
     ".git",
@@ -349,6 +353,8 @@ class AgentService:
             try:
                 for entry in sorted(workspace.iterdir(), key=lambda p: p.name):
                     if entry.is_file():
+                        if entry.name in JUNK_FILES or any(entry.name.startswith(p) for p in JUNK_PREFIXES):
+                            continue
                         if len(files) >= max_files:
                             truncated = True
                             break

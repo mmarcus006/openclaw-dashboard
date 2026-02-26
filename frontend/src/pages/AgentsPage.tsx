@@ -61,7 +61,7 @@ function AgentsContent(): React.ReactElement {
         </select>
       </div>
 
-      <AgentGrid agents={agents} loading={loading} error={error} />
+      <AgentGrid agents={agents} loading={loading} error={error} hasActiveFilter={searchTerm !== '' || statusFilter !== 'all'} />
     </>
   );
 }

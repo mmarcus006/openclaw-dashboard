@@ -79,4 +79,30 @@ describe('AgentsPage', () => {
     expect(screen.queryByText('Helper Bot')).not.toBeInTheDocument();
     expect(screen.queryByText('Backup Agent')).not.toBeInTheDocument();
   });
+
+  it('shows filter-aware empty state when search yields no results', async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    const searchInput = screen.getByPlaceholderText(/search agents/i);
+    await user.type(searchInput, 'nonexistent');
+
+    expect(screen.getByText('No agents match your search')).toBeInTheDocument();
+    expect(screen.queryByText('No agents configured')).not.toBeInTheDocument();
+  });
+
+  it('shows default empty state when no agents and no filter', () => {
+    useAgentStore.setState({
+      agents: [],
+      loading: false,
+      error: null,
+      searchTerm: '',
+      statusFilter: 'all',
+      sortBy: 'name',
+    });
+    renderPage();
+
+    expect(screen.getByText('No agents configured')).toBeInTheDocument();
+    expect(screen.queryByText('No agents match your search')).not.toBeInTheDocument();
+  });
 });

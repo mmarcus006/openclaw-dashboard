@@ -34,7 +34,7 @@ export function AgentCard({ agent, onClick }: AgentCardProps): React.ReactElemen
     <Card
       hoverable
       onClick={() => onClick(agent.id)}
-      className={`${borderClass} hover:translate-y-[-1px] hover:shadow-lg transition-all duration-150`}
+      className={`${borderClass} hover:translate-y-[-1px] hover:shadow-lg transition-all duration-150 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary`}
     >
       <div className="flex items-start justify-between mb-3">
         <div>

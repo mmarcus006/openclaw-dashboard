@@ -58,8 +58,14 @@ describe('EditorSidebar', () => {
 
   it('renders agent dropdown with agents', async () => {
     renderSidebar();
-    const select = screen.getByLabelText('Select agent');
-    expect(select).toBeInTheDocument();
+    const trigger = screen.getByLabelText('Select agent');
+    expect(trigger).toBeInTheDocument();
+    // New custom dropdown shows agent name in button; full "Name (id)" in listbox
+    await waitFor(() => {
+      expect(screen.getByText('COS')).toBeInTheDocument();
+    });
+    // Open the dropdown and verify option text
+    fireEvent.click(trigger);
     await waitFor(() => {
       expect(screen.getByText('COS (main)')).toBeInTheDocument();
     });

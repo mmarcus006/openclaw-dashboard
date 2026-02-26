@@ -212,11 +212,13 @@ export function GatewayPanel(): React.ReactElement {
       )}
 
       {/* Channels table */}
-      {channelEntries.length > 0 && (
-        <Card>
-          <h4 className="text-text-secondary text-xs font-medium uppercase tracking-wide mb-3">
-            Channels
-          </h4>
+      <Card>
+        <h4 className="text-text-secondary text-xs font-medium uppercase tracking-wide mb-3">
+          Channels
+        </h4>
+        {channelEntries.length === 0 ? (
+          <p className="text-text-tertiary text-sm py-4 text-center">No channels configured</p>
+        ) : (
           <div className="overflow-auto">
             <table className="w-full text-sm">
               <thead>
@@ -244,8 +246,8 @@ export function GatewayPanel(): React.ReactElement {
               </tbody>
             </table>
           </div>
-        </Card>
-      )}
+        )}
+      </Card>
 
       {/* Command history */}
       <Card>

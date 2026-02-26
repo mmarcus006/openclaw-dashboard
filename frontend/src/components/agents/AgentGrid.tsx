@@ -13,9 +13,10 @@ interface AgentGridProps {
   agents: AgentSummary[];
   loading: boolean;
   error: string | null;
+  hasActiveFilter?: boolean;
 }
 
-export function AgentGrid({ agents, loading, error }: AgentGridProps): React.ReactElement {
+export function AgentGrid({ agents, loading, error, hasActiveFilter = false }: AgentGridProps): React.ReactElement {
   const navigate = useNavigate();
 
   const handleAgentClick = (agentId: string): void => {
@@ -44,8 +45,14 @@ export function AgentGrid({ agents, loading, error }: AgentGridProps): React.Rea
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
         <Bot size={40} className="text-text-secondary" />
-        <p className="text-text-primary font-medium">No agents configured</p>
-        <p className="text-text-secondary text-sm">Add agents to openclaw.json to see them here</p>
+        {hasActiveFilter ? (
+          <p className="text-text-secondary text-sm">No agents match your search</p>
+        ) : (
+          <>
+            <p className="text-text-primary font-medium">No agents configured</p>
+            <p className="text-text-secondary text-sm">Add agents to openclaw.json to see them here</p>
+          </>
+        )}
       </div>
     );
   }

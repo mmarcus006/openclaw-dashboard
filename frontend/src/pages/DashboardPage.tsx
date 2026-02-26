@@ -23,7 +23,7 @@ interface StatCardProps {
 
 function StatCard({ label, value, icon, valueClass = 'text-text-primary' }: StatCardProps): React.ReactElement {
   return (
-    <div className="bg-bg-card border border-border rounded-lg p-4">
+    <div className="bg-bg-card border border-border rounded-lg p-4 transition-shadow hover:shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
       <div className="flex items-center justify-between mb-2">
         <p className="text-text-secondary text-xs">{label}</p>
         <span className="text-text-secondary">{icon}</span>
@@ -94,7 +94,7 @@ function RecentActivity({ agents }: { agents: AgentSummary[] }): React.ReactElem
       {recent.map((agent) => (
         <div
           key={agent.id}
-          className="flex items-center justify-between bg-bg-card border border-border rounded-lg px-4 py-3 cursor-pointer hover:bg-bg-hover transition-colors"
+          className="flex items-center justify-between bg-bg-card border border-border rounded-lg px-4 py-3 cursor-pointer hover:bg-bg-hover transition-all hover:shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
           onClick={() => navigate(`/agents/${encodeURIComponent(agent.id)}`)}
           role="button"
           tabIndex={0}

@@ -4,8 +4,9 @@
  */
 
 import React, { useEffect, useCallback, useRef, useState } from 'react';
-import Editor from '@monaco-editor/react';
+import Editor, { type Monaco } from '@monaco-editor/react';
 import { Save, RefreshCw, CheckCircle, XCircle, FileJson } from 'lucide-react';
+import { openclawDarkTheme, OPENCLAW_THEME_NAME } from '@/themes/monacoTheme';
 import { useConfigStore } from '@/stores/configStore';
 import { useToastStore } from '@/stores/toastStore';
 import { Button } from '@/components/common/Button';
@@ -26,6 +27,10 @@ const MONACO_OPTIONS = {
 } as const;
 
 const VALIDATE_DEBOUNCE_MS = 500;
+
+function handleEditorWillMount(monaco: Monaco): void {
+  monaco.editor.defineTheme(OPENCLAW_THEME_NAME, openclawDarkTheme);
+}
 
 export function ConfigEditor(): React.ReactElement {
   const content = useConfigStore((s) => s.content);
@@ -144,12 +149,12 @@ export function ConfigEditor(): React.ReactElement {
             <RefreshCw size={13} aria-hidden="true" />
             Reload
           </Button>
-          <span title={!dirty ? 'No unsaved changes' : undefined}>
+          <span title={!dirty ? 'No unsaved changes' : validation && !validation.valid ? 'Fix JSON errors before saving' : undefined}>
             <Button
               variant="primary"
               size="sm"
               loading={saving}
-              disabled={!dirty}
+              disabled={!dirty || (validation !== null && !validation.valid)}
               onClick={() => void handleSave()}
             >
               <Save size={13} aria-hidden="true" />
@@ -175,7 +180,8 @@ export function ConfigEditor(): React.ReactElement {
           language="json"
           value={content}
           onChange={(val) => { if (val !== undefined) updateContent(val); }}
-          theme="vs-dark"
+          beforeMount={handleEditorWillMount}
+          theme={OPENCLAW_THEME_NAME}
           options={MONACO_OPTIONS}
           loading={<div className="flex items-center justify-center h-full"><Spinner size="lg" /></div>}
         />

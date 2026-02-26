@@ -35,7 +35,8 @@ function ConfigPageContent(): React.ReactElement {
 }
 
 export default function ConfigPage(): React.ReactElement {
-  useDocumentTitle('Config');
+  const dirty = useConfigStore((s) => s.dirty);
+  useDocumentTitle(dirty ? '* Config' : 'Config');
 
   return (
     <Layout title="Config">

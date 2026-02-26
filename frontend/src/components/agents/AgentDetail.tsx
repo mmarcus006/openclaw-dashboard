@@ -2,8 +2,8 @@
  * AgentDetail — agent detail view with tabbed Files | Sessions.
  */
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useCallback } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, FolderOpen, FileText, MessageSquare } from 'lucide-react';
 import { getFileIcon } from '@/utils/fileIcons';
 import { Badge, statusVariant } from '@/components/common/Badge';
@@ -81,11 +81,33 @@ function FileRow({ file, agentId }: FileRowProps): React.ReactElement {
 }
 
 type TabId = 'files' | 'sessions';
+const TABS: TabId[] = ['files', 'sessions'];
 
 export function AgentDetail({ agent, loading, error }: AgentDetailProps): React.ReactElement {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<TabId>('files');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const activeTab: TabId = tabParam === 'sessions' ? 'sessions' : 'files';
   const clearSessions = useSessionStore((s) => s.clearSessions);
+
+  const setActiveTab = useCallback((tab: TabId) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (tab === 'files') { next.delete('tab'); } else { next.set('tab', tab); }
+      return next;
+    }, { replace: true });
+  }, [setSearchParams]);
+
+  const handleTabKeyDown = useCallback((e: React.KeyboardEvent) => {
+    const idx = TABS.indexOf(activeTab);
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      setActiveTab(TABS[(idx + 1) % TABS.length] as TabId);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      setActiveTab(TABS[(idx - 1 + TABS.length) % TABS.length] as TabId);
+    }
+  }, [activeTab, setActiveTab]);
 
   React.useEffect(() => {
     return () => clearSessions();
@@ -103,8 +125,8 @@ export function AgentDetail({ agent, loading, error }: AgentDetailProps): React.
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
         <p className="text-danger text-sm">{error ?? 'Agent not found'}</p>
-        <Button variant="secondary" size="sm" onClick={() => void navigate('/')}>
-          Back to dashboard
+        <Button variant="secondary" size="sm" onClick={() => void navigate('/agents')}>
+          Back to agents
         </Button>
       </div>
     );
@@ -116,7 +138,7 @@ export function AgentDetail({ agent, loading, error }: AgentDetailProps): React.
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => void navigate('/')}
+        onClick={() => void navigate('/agents')}
         className="mb-4"
       >
         <ArrowLeft size={14} aria-hidden="true" />
@@ -142,8 +164,13 @@ export function AgentDetail({ agent, loading, error }: AgentDetailProps): React.
       </Card>
 
       {/* Tabs */}
-      <div className="flex gap-0 border-b border-border mb-0">
+      <div className="flex gap-0 border-b border-border mb-0" role="tablist" aria-label="Agent detail tabs" onKeyDown={handleTabKeyDown}>
         <button
+          role="tab"
+          aria-selected={activeTab === 'files'}
+          aria-controls="tabpanel-files"
+          id="tab-files"
+          tabIndex={activeTab === 'files' ? 0 : -1}
           onClick={() => setActiveTab('files')}
           className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'files'
@@ -155,6 +182,11 @@ export function AgentDetail({ agent, loading, error }: AgentDetailProps): React.
           Files ({(agent.files ?? []).length})
         </button>
         <button
+          role="tab"
+          aria-selected={activeTab === 'sessions'}
+          aria-controls="tabpanel-sessions"
+          id="tab-sessions"
+          tabIndex={activeTab === 'sessions' ? 0 : -1}
           onClick={() => setActiveTab('sessions')}
           className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'sessions'
@@ -169,7 +201,7 @@ export function AgentDetail({ agent, loading, error }: AgentDetailProps): React.
 
       {/* Tab content */}
       {activeTab === 'files' ? (
-        <Card className="p-0 overflow-hidden rounded-t-none border-t-0">
+        <Card id="tabpanel-files" role="tabpanel" aria-labelledby="tab-files" className="p-0 overflow-hidden rounded-t-none border-t-0">
           {(agent.files ?? []).length === 0 ? (
             <div className="py-10 text-center">
               <p className="text-text-secondary text-sm">No files found in workspace</p>
@@ -198,7 +230,7 @@ export function AgentDetail({ agent, loading, error }: AgentDetailProps): React.
           )}
         </Card>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(300px,380px)_1fr] gap-0 border border-border rounded-b-lg overflow-hidden bg-bg-card">
+        <div id="tabpanel-sessions" role="tabpanel" aria-labelledby="tab-sessions" className="grid grid-cols-1 lg:grid-cols-[minmax(300px,380px)_1fr] gap-0 border border-border rounded-b-lg overflow-hidden bg-bg-card">
           {/* Session list */}
           <div className="border-r border-border max-h-[600px] overflow-y-auto">
             <SessionList agentId={agent.id} />

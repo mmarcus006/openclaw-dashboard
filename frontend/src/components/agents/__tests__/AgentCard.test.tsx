@@ -63,4 +63,15 @@ describe('AgentCard', () => {
     );
     expect(screen.getByText('claude-opus-4-6')).toBeInTheDocument();
   });
+
+  it('has focus-visible ring classes', () => {
+    const { container } = render(
+      <MemoryRouter>
+        <AgentCard agent={makeAgent()} onClick={vi.fn()} />
+      </MemoryRouter>,
+    );
+    const card = container.querySelector('[role="button"]')!;
+    expect(card.className).toContain('focus-visible:ring-2');
+    expect(card.className).toContain('focus-visible:ring-accent');
+  });
 });

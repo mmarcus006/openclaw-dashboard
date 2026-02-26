@@ -3,9 +3,9 @@
  * Shows agent selector dropdown + recursive file list.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ChevronDown, ChevronRight, FolderOpen, PanelLeftClose, PanelLeft } from 'lucide-react';
+import { ChevronDown, ChevronRight, FolderOpen, PanelLeftClose, PanelLeft, ChevronsUpDown, Check } from 'lucide-react';
 import { useAgentStore } from '@/stores/agentStore';
 import { useEditorStore } from '@/stores/editorStore';
 import { agentsApi } from '@/api/agents';
@@ -40,6 +40,11 @@ function groupByDirectory(files: FileEntry[]): FileGroup[] {
   return sorted.map(([dir, files]) => ({ dir, files }));
 }
 
+const JUNK_PATTERNS = new Set(['.DS_Store', '.Spotlight-V100', '.Trashes']);
+function isJunkFile(name: string): boolean {
+  return JUNK_PATTERNS.has(name) || name.startsWith('._');
+}
+
 export function EditorSidebar(): React.ReactElement {
   const [searchParams, setSearchParams] = useSearchParams();
   const agents = useAgentStore((s) => s.agents);
@@ -71,7 +76,7 @@ export function EditorSidebar(): React.ReactElement {
     void agentsApi
       .listFiles(selectedAgent, { recursive: true, depth: 2, maxFiles: 200 })
       .then(({ data }) => {
-        setFiles(data.files);
+        setFiles(data.files.filter((f: FileEntry) => !isJunkFile(f.name)));
         setTruncated(data.truncated);
       })
       .catch(() => {
@@ -80,10 +85,25 @@ export function EditorSidebar(): React.ReactElement {
       .finally(() => setLoading(false));
   }, [selectedAgent]);
 
-  const handleAgentChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const agentId = e.target.value;
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!dropdownOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [dropdownOpen]);
+
+  const handleAgentSelect = useCallback(
+    (agentId: string) => {
       if (!agentId) return;
+      setDropdownOpen(false);
       setSearchParams((prev) => {
         const next = new URLSearchParams(prev);
         next.set('agent', agentId);
@@ -158,20 +178,46 @@ export function EditorSidebar(): React.ReactElement {
         </div>
 
         {/* Agent selector */}
-        <div className="px-3 py-2 border-b border-border">
-          <select
-            value={selectedAgent}
-            onChange={handleAgentChange}
-            className="w-full bg-bg-primary border border-border rounded px-2 py-1.5 text-xs text-text-primary focus:outline-none focus:border-accent"
+        <div className="px-3 py-2 border-b border-border relative" ref={dropdownRef}>
+          <button
+            onClick={() => setDropdownOpen((v) => !v)}
+            className="w-full flex items-center justify-between bg-bg-primary border border-border rounded px-2 py-1.5 text-xs text-text-primary hover:border-accent focus:outline-none focus:border-accent transition-colors"
             aria-label="Select agent"
+            aria-expanded={dropdownOpen}
+            aria-haspopup="listbox"
           >
-            <option value="">Select agent...</option>
-            {agents.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.name} ({a.id})
-              </option>
-            ))}
-          </select>
+            <span className="truncate">
+              {selectedAgent ? agents.find((a) => a.id === selectedAgent)?.name ?? selectedAgent : 'Select agent...'}
+            </span>
+            <ChevronsUpDown size={12} className="text-text-secondary flex-shrink-0 ml-1" />
+          </button>
+          {dropdownOpen && (
+            <ul
+              role="listbox"
+              aria-label="Agent list"
+              className="absolute left-3 right-3 top-full mt-1 bg-bg-primary border border-border rounded shadow-lg z-20 max-h-48 overflow-y-auto"
+            >
+              {agents.map((a) => (
+                <li
+                  key={a.id}
+                  role="option"
+                  aria-selected={a.id === selectedAgent}
+                  onClick={() => handleAgentSelect(a.id)}
+                  className={`flex items-center gap-2 px-2 py-1.5 text-xs cursor-pointer transition-colors ${
+                    a.id === selectedAgent
+                      ? 'bg-accent/15 text-accent'
+                      : 'text-text-primary hover:bg-bg-hover'
+                  }`}
+                >
+                  {a.id === selectedAgent && <Check size={11} className="flex-shrink-0" />}
+                  <span className="truncate">{a.name} ({a.id})</span>
+                </li>
+              ))}
+              {agents.length === 0 && (
+                <li className="px-2 py-1.5 text-xs text-text-tertiary">No agents available</li>
+              )}
+            </ul>
+          )}
         </div>
 
         {/* File list */}

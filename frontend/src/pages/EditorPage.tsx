@@ -119,7 +119,8 @@ function EditorPageContent(): React.ReactElement {
 
 export default function EditorPage(): React.ReactElement {
   const currentFile = useEditorStore((s) => s.currentFile);
-  const title = currentFile ? `Edit: ${currentFile.path}` : 'Editor';
+  const dirtyPrefix = currentFile?.dirty ? '* ' : '';
+  const title = currentFile ? `${dirtyPrefix}Edit: ${currentFile.path}` : 'Editor';
   useDocumentTitle(title);
 
   return (
