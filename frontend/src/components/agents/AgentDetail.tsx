@@ -4,7 +4,8 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, File, FolderOpen } from 'lucide-react';
+import { ArrowLeft, FolderOpen } from 'lucide-react';
+import { getFileIcon } from '@/utils/fileIcons';
 import { Badge, statusVariant } from '@/components/common/Badge';
 import { Button } from '@/components/common/Button';
 import { Card } from '@/components/common/Card';
@@ -49,9 +50,11 @@ function FileRow({ file, agentId }: FileRowProps): React.ReactElement {
     void navigate(`/editor?agent=${encodeURIComponent(agentId)}&path=${encodeURIComponent(file.name)}`);
   };
 
+  const Icon = getFileIcon(file.name);
+
   return (
     <tr
-      className="border-b border-border hover:bg-bg-hover/40 cursor-pointer transition-colors"
+      className="border-b border-border hover:bg-bg-hover/40 cursor-pointer transition-colors focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[-2px]"
       onClick={handleOpen}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleOpen(); } }}
       tabIndex={0}
@@ -60,7 +63,7 @@ function FileRow({ file, agentId }: FileRowProps): React.ReactElement {
     >
       <td className="py-2.5 px-4">
         <div className="flex items-center gap-2">
-          <File size={14} className="text-text-secondary flex-shrink-0" aria-hidden="true" />
+          <Icon size={14} className="text-text-secondary flex-shrink-0" aria-hidden="true" />
           <span className="text-text-primary text-sm font-mono">{file.name}</span>
         </div>
       </td>
@@ -120,7 +123,7 @@ export function AgentDetail({ agent, loading, error }: AgentDetailProps): React.
             <p className="text-text-secondary text-sm font-mono mb-3">{agent.id}</p>
             <div className="flex items-center gap-2 text-text-secondary text-xs">
               <FolderOpen size={12} aria-hidden="true" />
-              <span className="font-mono">{agent.workspace}</span>
+              <span className="font-mono truncate max-w-xs" title={agent.workspace}>{agent.workspace}</span>
             </div>
           </div>
           <Badge variant="neutral">{shortenModel(agent.model)}</Badge>
