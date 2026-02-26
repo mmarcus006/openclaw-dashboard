@@ -1,21 +1,19 @@
 """Host header validation middleware — DNS rebinding protection (R5)."""
 
 import logging
-import os
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 
+from app.config import settings
 from app.utils import now_iso
 
 logger = logging.getLogger(__name__)
 
-# Allow extra hosts via DASHBOARD_ALLOWED_HOSTS env var (comma-separated).
-# Useful for Tailscale remote access: DASHBOARD_ALLOWED_HOSTS=miller-mac.taila54727.ts.net
-_extra = os.environ.get("DASHBOARD_ALLOWED_HOSTS", "")
-_extra_hosts = frozenset(h.strip().lower() for h in _extra.split(",") if h.strip())
-ALLOWED_HOSTS = frozenset(["localhost", "127.0.0.1"]) | _extra_hosts
+# Read allowed hosts from centralized config (supports DASHBOARD_ALLOWED_HOSTS env var).
+# Pass a JSON array: DASHBOARD_ALLOWED_HOSTS='["localhost","127.0.0.1","miller-mac.taila54727.ts.net"]'
+ALLOWED_HOSTS = frozenset(h.lower() for h in settings.ALLOWED_HOSTS)
 
 
 class HostValidationMiddleware(BaseHTTPMiddleware):
