@@ -10,6 +10,7 @@ from app.config import Settings, settings as _settings
 from app.services.agent_service import AgentService
 from app.services.config_service import ConfigService
 from app.services.file_service import FileService
+from app.services.cron_service import CronService
 from app.services.gateway_service import GatewayService
 
 
@@ -61,3 +62,13 @@ def get_gateway_service() -> GatewayService:
         GatewayService wrapping the openclaw CLI subprocess.
     """
     return GatewayService(settings=_settings)
+
+
+@lru_cache(maxsize=1)
+def get_cron_service() -> CronService:
+    """Return the singleton CronService instance.
+
+    Returns:
+        CronService that reads cron jobs from openclaw.json.
+    """
+    return CronService(settings=_settings)

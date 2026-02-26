@@ -1,3 +1,3 @@
 """API routers."""
 
-__all__ = ["agents", "config", "gateway", "health"]
+__all__ = ["agents", "config", "cron", "gateway", "health"]

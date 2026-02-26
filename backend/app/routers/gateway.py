@@ -7,7 +7,12 @@ actions — never create_subprocess_shell with string interpolation (R6).
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from app.dependencies import get_gateway_service
-from app.models.gateway import CommandResponse, GatewayAction, GatewayStatusResponse
+from app.models.gateway import (
+    CommandResponse,
+    GatewayAction,
+    GatewayHistoryResponse,
+    GatewayStatusResponse,
+)
 from app.services.gateway_service import GatewayService
 from app.utils import limiter
 
@@ -84,3 +89,17 @@ async def gateway_command(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except TimeoutError as exc:
         raise HTTPException(status_code=504, detail=str(exc)) from exc
+
+
+@router.get(
+    "/history",
+    response_model=GatewayHistoryResponse,
+    summary="Get gateway command history",
+    description="Return last 10 gateway commands (in-memory, resets on restart).",
+    status_code=status.HTTP_200_OK,
+)
+async def get_gateway_history(
+    gateway_svc: GatewayService = Depends(get_gateway_service),
+) -> GatewayHistoryResponse:
+    """Return recent gateway command history."""
+    return gateway_svc.get_history()

@@ -48,3 +48,17 @@ class CommandResponse(BaseModel):
             }
         }
     }
+
+
+class GatewayCommandEntry(BaseModel):
+    """A single gateway command execution record."""
+    command: str = Field(..., description="Command that was run, e.g. 'start'")
+    timestamp: str = Field(..., description="ISO 8601 timestamp")
+    exit_code: int = Field(..., description="Process exit code (0 = success)")
+    output: Optional[str] = Field(None, description="stdout/stderr snippet (max 500 chars)")
+
+
+class GatewayHistoryResponse(BaseModel):
+    """Response containing recent gateway command history."""
+    commands: list[GatewayCommandEntry] = Field(default_factory=list)
+    total: int = Field(..., description="Total number of stored commands")

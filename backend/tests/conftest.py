@@ -18,6 +18,7 @@ from app.main import create_app
 from app.services.agent_service import AgentService
 from app.services.config_service import ConfigService
 from app.services.file_service import FileService
+from app.services.cron_service import CronService
 from app.services.gateway_service import GatewayService
 
 
@@ -184,6 +185,19 @@ def gateway_service(test_settings: Settings) -> GatewayService:
     return GatewayService(settings=test_settings)
 
 
+@pytest.fixture
+def cron_service(test_settings: Settings) -> CronService:
+    """Return a CronService using the mock home.
+
+    Args:
+        test_settings: Test settings pointing to temp dir.
+
+    Returns:
+        CronService instance.
+    """
+    return CronService(settings=test_settings)
+
+
 # ---------------------------------------------------------------------------
 # HTTP client fixture
 # ---------------------------------------------------------------------------
@@ -195,6 +209,7 @@ async def async_client(
     agent_service: AgentService,
     config_service: ConfigService,
     gateway_service: GatewayService,
+    cron_service: CronService,
 ) -> AsyncGenerator[AsyncClient, None]:
     """Return an async HTTP client wired to the test FastAPI app.
 
@@ -206,6 +221,7 @@ async def async_client(
         agent_service: AgentService pointing to temp dir.
         config_service: ConfigService pointing to temp dir.
         gateway_service: GatewayService pointing to temp dir.
+        cron_service: CronService pointing to temp dir.
 
     Yields:
         AsyncClient that sends requests to the test app.
@@ -213,6 +229,7 @@ async def async_client(
     from app.dependencies import (
         get_agent_service,
         get_config_service,
+        get_cron_service,
         get_file_service,
         get_gateway_service,
         get_settings,
@@ -224,6 +241,7 @@ async def async_client(
     app.dependency_overrides[get_agent_service] = lambda: agent_service
     app.dependency_overrides[get_config_service] = lambda: config_service
     app.dependency_overrides[get_gateway_service] = lambda: gateway_service
+    app.dependency_overrides[get_cron_service] = lambda: cron_service
 
     # Disable rate limiter in tests (env set below ensures limiter.enabled=False)
     import os

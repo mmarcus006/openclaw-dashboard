@@ -10,11 +10,19 @@ Security rules (R6):
 
 import asyncio
 import shutil
+from collections import deque
 
 import structlog
 
 from app.config import Settings
-from app.models.gateway import CommandResponse, GatewayAction, GatewayStatusResponse
+from app.models.gateway import (
+    CommandResponse,
+    GatewayAction,
+    GatewayCommandEntry,
+    GatewayHistoryResponse,
+    GatewayStatusResponse,
+)
+from app.utils import now_iso
 
 logger = structlog.get_logger(__name__)
 
@@ -28,6 +36,8 @@ class GatewayService:
         settings: Application settings (used to find HOME and CLI path).
     """
 
+    _MAX_HISTORY = 10
+
     def __init__(self, settings: Settings) -> None:
         """Initialise GatewayService.
 
@@ -35,6 +45,7 @@ class GatewayService:
             settings: Application settings.
         """
         self._settings = settings
+        self._history: deque[GatewayCommandEntry] = deque(maxlen=self._MAX_HISTORY)
 
     # ------------------------------------------------------------------
     # Public API
@@ -106,6 +117,13 @@ class GatewayService:
         output = (stdout + "\n" + stderr).strip() if (stdout or stderr) else None
         success = returncode == 0
 
+        self._history.appendleft(GatewayCommandEntry(
+            command=action.value,
+            timestamp=now_iso(),
+            exit_code=returncode,
+            output=output[:500] if output else None,
+        ))
+
         return CommandResponse(
             success=success,
             action=action,
@@ -114,6 +132,11 @@ class GatewayService:
             ),
             output=output or None,
         )
+
+    def get_history(self) -> GatewayHistoryResponse:
+        """Return recent command history (in-memory, resets on restart)."""
+        commands = list(self._history)
+        return GatewayHistoryResponse(commands=commands, total=len(commands))
 
     def is_installed(self) -> bool:
         """Return True if the openclaw CLI is available in PATH.

@@ -621,6 +621,42 @@ export interface components {
              */
             etag: string;
         };
+        /** GatewayCommandEntry */
+        GatewayCommandEntry: {
+            /** @description Command that was run, e.g. 'start' */
+            command: string;
+            /** @description ISO 8601 timestamp */
+            timestamp: string;
+            /** @description Process exit code (0 = success) */
+            exit_code: number;
+            /** @description stdout/stderr snippet (max 500 chars) */
+            output?: string | null;
+        };
+        /** GatewayHistoryResponse */
+        GatewayHistoryResponse: {
+            commands: components["schemas"]["GatewayCommandEntry"][];
+            total: number;
+        };
+        /** CronJobEntry */
+        CronJobEntry: {
+            /** @description Job name from config */
+            name: string;
+            /** @description Raw cron expression */
+            schedule: string;
+            /** @description Human-readable schedule */
+            schedule_human: string;
+            /** @description ISO 8601 next run time */
+            next_run?: string | null;
+            /** @description Whether the job is enabled */
+            enabled: boolean;
+            /** @description Error message if schedule is invalid */
+            error?: string | null;
+        };
+        /** CronJobListResponse */
+        CronJobListResponse: {
+            jobs: components["schemas"]["CronJobEntry"][];
+            total: number;
+        };
         /** ValidationError */
         ValidationError: {
             /** Location */

@@ -25,6 +25,10 @@ export type ConfigWriteRequest = components['schemas']['ConfigWriteRequest'];
 export type GatewayAction = components['schemas']['GatewayAction'];
 export type GatewayStatusResponse = components['schemas']['GatewayStatusResponse'];
 export type CommandResponse = components['schemas']['CommandResponse'];
+export type GatewayCommandEntry = components['schemas']['GatewayCommandEntry'];
+export type GatewayHistoryResponse = components['schemas']['GatewayHistoryResponse'];
+export type CronJobEntry = components['schemas']['CronJobEntry'];
+export type CronJobListResponse = components['schemas']['CronJobListResponse'];
 
 // ---------------------------------------------------------------------------
 // Manual: typed subsystems map (backend returns dict, we know the shape)
