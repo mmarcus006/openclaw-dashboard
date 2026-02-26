@@ -10,6 +10,7 @@ import type {
   FileContentResponse,
   SaveResponse,
 } from '@/types';
+import type { FileListResponse } from '@/types/files';
 
 export type { ApiResponse };
 
@@ -46,4 +47,19 @@ export const agentsApi = {
       { content },
       etag,
     ),
+
+  /** List files in an agent's workspace */
+  listFiles: (
+    agentId: string,
+    options?: { recursive?: boolean; depth?: number; maxFiles?: number }
+  ): Promise<ApiResponse<FileListResponse>> => {
+    const params = new URLSearchParams();
+    if (options?.recursive) params.set('recursive', 'true');
+    if (options?.depth !== undefined) params.set('depth', String(options.depth));
+    if (options?.maxFiles !== undefined) params.set('max_files', String(options.maxFiles));
+    const qs = params.toString();
+    return apiClient.get<FileListResponse>(
+      `/api/agents/${encodeURIComponent(agentId)}/files/browse${qs ? `?${qs}` : ''}`,
+    );
+  },
 };

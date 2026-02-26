@@ -12,15 +12,21 @@ This logic lives in ONE place: resolve_agent_workspace().
 No other code may construct agent paths — it must call this function.
 """
 
+from __future__ import annotations
+
 import json
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import structlog
 
 from app.config import Settings
 from app.models.agent import AgentDetailResponse, AgentFileInfo, AgentListResponse, AgentSummary
 from app.services.file_service import FileService
+
+if TYPE_CHECKING:
+    from app.models.file import FileListResponse
 
 logger = structlog.get_logger(__name__)
 
@@ -37,7 +43,49 @@ WORKSPACE_FILES = {
     "PROJECT.md",
 }
 
+# Directories to exclude from recursive listing
+EXCLUDE_DIRS = {
+    ".git",
+    "node_modules",
+    ".venv",
+    "__pycache__",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".ruff_cache",
+}
+
+# File extensions considered binary (won't be displayed in text editors)
+BINARY_EXTENSIONS = {
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".webp",
+    ".ico",
+    ".woff",
+    ".woff2",
+    ".ttf",
+    ".eot",
+    ".otf",
+    ".pdf",
+    ".zip",
+    ".tar",
+    ".gz",
+    ".bz2",
+    ".7z",
+    ".exe",
+    ".dll",
+    ".so",
+    ".dylib",
+    ".mp3",
+    ".mp4",
+    ".wav",
+    ".avi",
+    ".mov",
+}
+
 _STATUS_ACTIVE_THRESHOLD_SECONDS = 600  # 10 minutes
+_MAX_DEPTH_SERVER = 3  # Hard ceiling for recursive depth
 
 
 class AgentService:
@@ -266,6 +314,105 @@ class AgentService:
                     pass
 
         return files
+
+    async def list_workspace_files_recursive(
+        self,
+        agent_id: str,
+        *,
+        recursive: bool = False,
+        depth: int = 2,
+        max_files: int = 200,
+    ) -> "FileListResponse":
+        """List files in an agent's workspace, optionally recursive.
+
+        Args:
+            agent_id: Agent identifier.
+            recursive: Whether to scan subdirectories.
+            depth: Max directory depth (capped at _MAX_DEPTH_SERVER).
+            max_files: Maximum files to return.
+
+        Returns:
+            FileListResponse with file entries and truncation flag.
+        """
+        from app.models.file import FileEntry, FileListResponse
+
+        workspace = self.resolve_agent_workspace(agent_id)
+        if not workspace.exists():
+            raise FileNotFoundError(f"Agent workspace not found for '{agent_id}': {workspace}")
+
+        effective_depth = min(depth, _MAX_DEPTH_SERVER)
+        files: list[FileEntry] = []
+        truncated = False
+
+        if not recursive:
+            # Flat listing — scan top-level only
+            try:
+                for entry in sorted(workspace.iterdir(), key=lambda p: p.name):
+                    if entry.is_file():
+                        if len(files) >= max_files:
+                            truncated = True
+                            break
+                        try:
+                            stat = entry.stat()
+                            files.append(
+                                FileEntry(
+                                    name=entry.name,
+                                    path=entry.name,
+                                    size=stat.st_size,
+                                    mtime=stat.st_mtime,
+                                    is_binary=entry.suffix.lower() in BINARY_EXTENSIONS,
+                                )
+                            )
+                        except OSError:
+                            pass
+            except OSError:
+                pass
+        else:
+            # Recursive listing with depth limit and excludes
+            import os
+
+            for dirpath, dirnames, filenames in os.walk(workspace):
+                # Calculate current depth relative to workspace
+                rel_dir = Path(dirpath).relative_to(workspace)
+                current_depth = len(rel_dir.parts)
+
+                # Prune excluded directories IN-PLACE (modifying dirnames affects os.walk)
+                dirnames[:] = [
+                    d
+                    for d in sorted(dirnames)
+                    if d not in EXCLUDE_DIRS and current_depth < effective_depth
+                ]
+
+                for fname in sorted(filenames):
+                    # Skip hidden files and __pycache__ artifacts
+                    if fname.startswith(".") or fname.endswith(".pyc"):
+                        continue
+
+                    if len(files) >= max_files:
+                        truncated = True
+                        break
+
+                    full_path = Path(dirpath) / fname
+                    rel_path = full_path.relative_to(workspace)
+
+                    try:
+                        stat = full_path.stat()
+                        files.append(
+                            FileEntry(
+                                name=fname,
+                                path=str(rel_path),
+                                size=stat.st_size,
+                                mtime=stat.st_mtime,
+                                is_binary=full_path.suffix.lower() in BINARY_EXTENSIONS,
+                            )
+                        )
+                    except OSError:
+                        pass
+
+                if truncated:
+                    break
+
+        return FileListResponse(files=files, total=len(files), truncated=truncated)
 
     def _extract_agent_meta(
         self, agent_id: str, cfg: dict, sessions: dict | None = None

@@ -175,3 +175,94 @@ class TestNowIso:
         # Should be parseable as a datetime
         parsed = datetime.fromisoformat(result)
         assert parsed.tzinfo is not None
+
+
+class TestListWorkspaceFilesRecursive:
+    """Tests for list_workspace_files_recursive."""
+
+    @pytest.mark.asyncio
+    async def test_recursive_listing(
+        self, agent_service: AgentService, mock_openclaw_home: Path
+    ):
+        """Returns files from subdirectories when recursive=True."""
+        workspace = mock_openclaw_home / "workspace"
+        # Create a subdirectory with a file
+        subdir = workspace / "memory"
+        subdir.mkdir(exist_ok=True)
+        (subdir / "notes.md").write_text("# Notes")
+
+        result = await agent_service.list_workspace_files_recursive(
+            "main",
+            recursive=True,
+            depth=2,
+            max_files=200,
+        )
+        paths = [f.path for f in result.files]
+        assert "memory/notes.md" in paths
+        assert result.truncated is False
+
+    @pytest.mark.asyncio
+    async def test_depth_limit(
+        self, agent_service: AgentService, mock_openclaw_home: Path
+    ):
+        """Max depth 3 enforced — files beyond depth 3 not returned."""
+        workspace = mock_openclaw_home / "workspace"
+        # Create nested dirs: level1/level2/level3/level4
+        deep = workspace / "a" / "b" / "c" / "d"
+        deep.mkdir(parents=True)
+        (deep / "deep.txt").write_text("deep file")
+        # Also create a file at depth 3 (should be included)
+        (workspace / "a" / "b" / "c" / "shallow.txt").write_text("shallow")
+
+        result = await agent_service.list_workspace_files_recursive(
+            "main",
+            recursive=True,
+            depth=3,
+            max_files=200,
+        )
+        paths = [f.path for f in result.files]
+        # depth=3 means we can go 3 levels deep: a/b/c is ok, a/b/c/d is not
+        assert "a/b/c/shallow.txt" in paths
+        assert "a/b/c/d/deep.txt" not in paths
+
+    @pytest.mark.asyncio
+    async def test_excludes(
+        self, agent_service: AgentService, mock_openclaw_home: Path
+    ):
+        """.git, node_modules, __pycache__ directories are excluded."""
+        workspace = mock_openclaw_home / "workspace"
+        (workspace / ".git").mkdir(exist_ok=True)
+        (workspace / ".git" / "config").write_text("git config")
+        (workspace / "node_modules").mkdir(exist_ok=True)
+        (workspace / "node_modules" / "package.json").write_text("{}")
+        (workspace / "__pycache__").mkdir(exist_ok=True)
+        (workspace / "__pycache__" / "mod.cpython-311.pyc").write_bytes(b"\x00")
+
+        result = await agent_service.list_workspace_files_recursive(
+            "main",
+            recursive=True,
+            depth=2,
+            max_files=200,
+        )
+        paths = [f.path for f in result.files]
+        assert not any(".git" in p for p in paths)
+        assert not any("node_modules" in p for p in paths)
+        assert not any("__pycache__" in p for p in paths)
+
+    @pytest.mark.asyncio
+    async def test_max_files_truncation(
+        self, agent_service: AgentService, mock_openclaw_home: Path
+    ):
+        """>max_files returns truncated=True."""
+        workspace = mock_openclaw_home / "workspace"
+        # Create 10 files, set max to 5
+        for i in range(10):
+            (workspace / f"file_{i:02d}.txt").write_text(f"content {i}")
+
+        result = await agent_service.list_workspace_files_recursive(
+            "main",
+            recursive=False,
+            max_files=5,
+        )
+        assert len(result.files) == 5
+        assert result.truncated is True

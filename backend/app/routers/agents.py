@@ -14,6 +14,7 @@ from app.dependencies import get_agent_service, get_file_service
 from app.middleware.error_handler import ETagMismatchError
 from app.models.agent import AgentDetailResponse, AgentListResponse
 from app.models.common import FileContentResponse, SaveResponse
+from app.models.file import FileListResponse
 from app.services.agent_service import AgentService
 from app.services.file_service import FileService
 from app.utils import now_iso
@@ -89,6 +90,49 @@ async def get_agent(
 # ---------------------------------------------------------------------------
 # File read/write (R1: path as query parameter)
 # ---------------------------------------------------------------------------
+
+
+@router.get(
+    "/{agent_id}/files/browse",
+    response_model=FileListResponse,
+    summary="List files in agent workspace",
+    description="List files in an agent's workspace with optional recursive scanning.",
+    status_code=status.HTTP_200_OK,
+    responses={
+        404: {"description": "Agent workspace not found"},
+    },
+)
+async def list_agent_files(
+    agent_id: str,
+    recursive: bool = Query(False, description="Scan subdirectories recursively"),
+    depth: int = Query(2, ge=1, le=3, description="Max directory depth (1-3)"),
+    max_files: int = Query(200, ge=1, le=500, description="Max files to return"),
+    agent_svc: AgentService = Depends(get_agent_service),
+) -> FileListResponse:
+    """List files in an agent's workspace.
+
+    Args:
+        agent_id: Agent identifier from URL.
+        recursive: Whether to scan subdirectories recursively.
+        depth: Maximum directory depth (1-3, server enforces hard ceiling of 3).
+        max_files: Maximum number of files to return (1-500).
+        agent_svc: AgentService (injected).
+
+    Returns:
+        FileListResponse with file entries and truncation flag.
+
+    Raises:
+        HTTPException 404: If the agent workspace is not found.
+    """
+    try:
+        return await agent_svc.list_workspace_files_recursive(
+            agent_id,
+            recursive=recursive,
+            depth=depth,
+            max_files=max_files,
+        )
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @router.get(

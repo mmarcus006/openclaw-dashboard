@@ -6,12 +6,14 @@
 
 import React, { useEffect, useCallback } from 'react';
 import Editor from '@monaco-editor/react';
-import { Save, AlertCircle } from 'lucide-react';
+import type { Monaco } from '@monaco-editor/react';
+import { Save } from 'lucide-react';
 import { useEditorStore } from '@/stores/editorStore';
 import { useToastStore } from '@/stores/toastStore';
 import { Button } from '@/components/common/Button';
 import { Spinner } from '@/components/common/Spinner';
 import { Modal } from '@/components/common/Modal';
+import { openclawDarkTheme, OPENCLAW_THEME_NAME } from '@/themes/monacoTheme';
 
 const MONACO_OPTIONS = {
   fontSize: 13,
@@ -26,7 +28,7 @@ const MONACO_OPTIONS = {
   automaticLayout: true,
 } as const;
 
-export function FileEditor(): React.ReactElement {
+export function FileEditor(): React.ReactElement | null {
   const currentFile = useEditorStore((s) => s.currentFile);
   const loading = useEditorStore((s) => s.loading);
   const saving = useEditorStore((s) => s.saving);
@@ -77,6 +79,10 @@ export function FileEditor(): React.ReactElement {
     await loadFile(currentFile.agentId, currentFile.path);
   };
 
+  const handleEditorWillMount = useCallback((monaco: Monaco) => {
+    monaco.editor.defineTheme(OPENCLAW_THEME_NAME, openclawDarkTheme);
+  }, []);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -86,13 +92,7 @@ export function FileEditor(): React.ReactElement {
   }
 
   if (!currentFile) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full gap-3 text-center">
-        <AlertCircle size={40} className="text-text-secondary" />
-        <p className="text-text-secondary text-sm">No file loaded</p>
-        <p className="text-text-secondary text-xs">Open a file from an agent&apos;s workspace to edit it</p>
-      </div>
-    );
+    return null;
   }
 
   return (
@@ -135,7 +135,8 @@ export function FileEditor(): React.ReactElement {
           language={currentFile.language}
           value={currentFile.content}
           onChange={(val) => { if (val !== undefined) updateContent(val); }}
-          theme="vs-dark"
+          theme={OPENCLAW_THEME_NAME}
+          beforeMount={handleEditorWillMount}
           options={MONACO_OPTIONS}
           loading={<div className="flex items-center justify-center h-full"><Spinner size="lg" /></div>}
         />
