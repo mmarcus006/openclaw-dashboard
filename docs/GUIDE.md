@@ -63,7 +63,7 @@ make serve   # Serves everything from port 8400 (no separate frontend)
 
 **URL:** `/`
 
-![Dashboard](guide-screenshots/01-dashboard.png)
+![Dashboard](https://raw.githubusercontent.com/mmarcus006/openclaw-dashboard/main/docs/guide-screenshots/01-dashboard.png)
 
 The Dashboard is your at-a-glance view of the entire agent fleet. It shows:
 
@@ -102,7 +102,7 @@ Two action buttons at the bottom:
 
 **URL:** `/agents`
 
-![Agents Page](guide-screenshots/02-agents.png)
+![Agents Page](https://raw.githubusercontent.com/mmarcus006/openclaw-dashboard/main/docs/guide-screenshots/02-agents.png)
 
 The Agents page shows your entire fleet in a responsive 4-column grid. Each card displays:
 - Agent **name** (bold) and **ID** (monospace)
@@ -112,7 +112,7 @@ The Agents page shows your entire fleet in a responsive 4-column grid. Each card
 
 ### Search
 
-![Search filtering](guide-screenshots/03-agents-search.png)
+![Search filtering](https://raw.githubusercontent.com/mmarcus006/openclaw-dashboard/main/docs/guide-screenshots/03-agents-search.png)
 
 Type in the search bar to **instantly filter** agents by name, ID, or model. The result count badge updates in real-time. Click the `×` button or clear the input to reset.
 
@@ -140,7 +140,7 @@ Use the **"Sort: Name"** dropdown to sort by:
 
 **URL:** `/agents/{agent_id}`
 
-![Agent Detail - Files Tab](guide-screenshots/04-agent-detail-files.png)
+![Agent Detail - Files Tab](https://raw.githubusercontent.com/mmarcus006/openclaw-dashboard/main/docs/guide-screenshots/04-agent-detail-files.png)
 
 Click any agent card to see its full detail page. The top section shows:
 - **Agent name** with a colored status badge (green "active", amber "idle", gray "stopped")
@@ -173,7 +173,7 @@ Click **"Sessions"** to switch to the session list. This shows every conversatio
 
 ## Session Viewer — Conversation History
 
-![Session Viewer](guide-screenshots/06-session-viewer.png)
+![Session Viewer](https://raw.githubusercontent.com/mmarcus006/openclaw-dashboard/main/docs/guide-screenshots/06-session-viewer.png)
 
 The Sessions tab presents a **two-panel layout**:
 
@@ -209,7 +209,7 @@ Messages can contain multiple content block types:
 
 **URL:** `/editor` or `/editor?agent={id}&path={filename}`
 
-![Editor with file open](guide-screenshots/08-editor-file.png)
+![Editor with file open](https://raw.githubusercontent.com/mmarcus006/openclaw-dashboard/main/docs/guide-screenshots/08-editor-file.png)
 
 The Editor page is a full-featured file editor with a sidebar file browser.
 
@@ -261,7 +261,7 @@ When you edit a file, three indicators appear:
 
 **URL:** `/config`
 
-![Config Editor](guide-screenshots/09-config.png)
+![Config Editor](https://raw.githubusercontent.com/mmarcus006/openclaw-dashboard/main/docs/guide-screenshots/09-config.png)
 
 The Config page is a specialized JSON editor for `~/.openclaw/openclaw.json` — the master configuration file for OpenClaw.
 
@@ -293,7 +293,7 @@ If another process modifies `openclaw.json` while you have it open, a modal appe
 
 **URL:** `/gateway`
 
-![Gateway Page](guide-screenshots/10-gateway.png)
+![Gateway Page](https://raw.githubusercontent.com/mmarcus006/openclaw-dashboard/main/docs/guide-screenshots/10-gateway.png)
 
 The Gateway page manages the OpenClaw gateway daemon — the process that connects your agents to messaging platforms (WhatsApp, Telegram, Discord, etc.).
 
